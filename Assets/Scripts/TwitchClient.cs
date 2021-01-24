@@ -17,8 +17,8 @@ public class TwitchClient : MonoBehaviour
     CommandQueue commandQueue;
     private PubSub pubSub;
     [SerializeField] Text debug;
-    private string channel_name = "simpathey";
-    private string bot_name = "simpagamebot";
+    private string channel_name;
+    private string bot_name;
 
     private void Awake()
     {
@@ -32,7 +32,11 @@ public class TwitchClient : MonoBehaviour
         Application.runInBackground = true;
 
         //set up bot and tell what channel to join
-        ConnectionCredentials credentials = new ConnectionCredentials("simpagamebot", Secrets.bot_access_token);
+        Debug.Log($"{Secrets.bot_name}: {Secrets.bot_access_token}");
+        bot_name = Secrets.bot_name;
+        channel_name = Secrets.channel_name;
+        ConnectionCredentials credentials = new ConnectionCredentials(Secrets.bot_name, Secrets.bot_access_token);
+
         client = new Client();
         client.Initialize(credentials, channel_name);
         //pubSub = new PubSub();
@@ -67,6 +71,8 @@ public class TwitchClient : MonoBehaviour
     private void MyCommandReceivedFunction(object sender, OnChatCommandReceivedArgs e)
     {
         Arrrgs chatArgs = new Arrrgs();
+        chatArgs.isMod = e.Command.ChatMessage.IsModerator;
+        chatArgs.isBroadcaster = e.Command.ChatMessage.IsBroadcaster;
         chatArgs.message = e.Command.ChatMessage.Message;
         chatArgs.userID = e.Command.ChatMessage.UserId;
         chatArgs.displayName = e.Command.ChatMessage.DisplayName;

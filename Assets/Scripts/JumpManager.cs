@@ -52,8 +52,8 @@ public class JumpManager : MonoBehaviour
             orderInLayer++;
             playerMarble = mb.GetComponentInChildren<MarbleObject>();
             playerMarble.playerName.text = displayName;
-            int marbleIndex = gameData.GetPlayerEquipSkin(userID);
-            GameObject marbleGameObject = marbleList.GetMarbleFromMarbleCode(marbleIndex);
+            var marbleName = gameData.GetPlayerEquipSkin(userID);
+            GameObject marbleGameObject = marbleList.GetMarbleGameObject(marbleName);
             playerMarble.gameMarbleSprite.sprite = marbleGameObject.GetComponent<Marble>().marbleSprite;
             playerMarble.playerID = userID;
         }
@@ -91,8 +91,10 @@ public class JumpManager : MonoBehaviour
             orderInLayer++;
             playerMarble = mb.GetComponentInChildren<MarbleObject>();
             playerMarble.playerName.text = displayName;
-            int marbleIndex = gameData.GetPlayerEquipSkin(userID);
-            GameObject marbleGameObject = marbleList.GetMarbleFromMarbleCode(marbleIndex);
+
+            var marbleName = gameData.GetPlayerEquipSkin(userID);
+            GameObject marbleGameObject = marbleList.GetMarbleGameObject(marbleName);
+
             playerMarble.gameMarbleSprite.sprite = marbleGameObject.GetComponent<Marble>().marbleSprite;
             playerMarble.playerID = userID;
         }

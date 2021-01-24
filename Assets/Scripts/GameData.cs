@@ -5,6 +5,7 @@ using Newtonsoft.Json;
 using TwitchLib.Client.Models;
 using TwitchLib.Unity;
 using TwitchLib.Client.Events;
+using System.Linq;
 
 public class GameData : MonoBehaviour
 {
@@ -18,34 +19,17 @@ public class GameData : MonoBehaviour
     void Start()
     {
         //Load game data at start of game from JSON
-        Dictionary<string, PlayerData> deserializedProduct = JsonConvert.DeserializeObject<Dictionary<string, PlayerData>>(dataManager.Load());
-        gameData = deserializedProduct;
-        marbleList = FindObjectOfType<MarbleList>();
-        gameData = marbleList.AddNewMarblesToGameData(gameData);
+        gameData = JsonConvert.DeserializeObject<Dictionary<string, PlayerData>>(dataManager.Load());
+        foreach (var kvp in gameData) {
+            if (string.IsNullOrWhiteSpace(kvp.Value.selectedSkin)) kvp.Value.selectedSkin = "default";
+            if (!kvp.Value.purchasedSkins.Any()) kvp.Value.purchasedSkins.Add("default");
+        }
         dataManager.NewSave(gameData);
     }
 
-    void Update()
-    {
-        if (Input.GetKeyDown(KeyCode.Alpha7))
-        {
-            PlayerData tempData = new PlayerData();
-            tempData.money = 0;
-            tempData.skins = FindObjectOfType<MarbleList>().getEmptyAllMarbleDictionary();
-            gameData.Add("123456", tempData);
-            //var convertedDictionary = FindObjectOfType<SpriteDictionary>().getEmptyAllSpritesDictionary().ToDictionary(item => item.Key.ToString(), item => item.Value.ToString());
-            Debug.Log("pressing 7");
-            //JsonConvert.SerializeObject(dataManager);
-        }
-        if (Input.GetKeyDown(KeyCode.Alpha9))
-        {
-            SaveGameDataToTXT();
-            Debug.Log("GAME DATA SUCCESFULLY SAVED!!!!");
-        }
-    }
     public bool CheckIfPlayerExists(string playerID)
     {
-
+        Debug.Log($"Checking if player with ID [{playerID}] exists in config");
         if (gameData.ContainsKey(playerID) )
         {
             return true;
@@ -57,64 +41,81 @@ public class GameData : MonoBehaviour
     }
     public void CreateNewPlayerEntry(Arrrgs e)
     {
+        var marbleList = FindObjectOfType<MarbleList>();
         PlayerData tempData = new PlayerData();
         tempData.money = 0;
-        tempData.skins = FindObjectOfType<MarbleList>().getEmptyAllMarbleDictionary();
-        tempData.equiptSkin = 0;
+        tempData.selectedSkin = marbleList.marbleCodeToCommonName[0];
         tempData.playerName = e.displayName;
         tempData.isSubscribed = false;
         gameData.Add(e.userID, tempData);
         SaveGameDataToTXT();
         Debug.Log("GAME DATA SUCCESFULLY SAVED!!!!");
     }
+
     public void AddMoneyToPlayerID(int money, string playerID)
     {
+        Debug.Log($"AddMoneyToPlayerID: {money} -> {playerID}");
+        var userGameData = gameData[playerID];
+        if (userGameData == null) return;
         gameData[playerID].money += money;
         SaveGameDataToTXT();
         Debug.Log("GAME DATA SUCCESFULLY SAVED!!!!");
     }
+
     public void SubtractMoneyFromPlayerID(int money, string playerID)
     {
+        Debug.Log($"SubtractMoneyFromPlayerID: {money} -> {playerID}");
+        var userGameData = gameData[playerID];
+        if (userGameData == null) return;
         gameData[playerID].money -= money;
         SaveGameDataToTXT();
         Debug.Log("GAME DATA SUCCESFULLY SAVED!!!!");
     }
+
     public int CheckPlayerMoney(string playerID)
     {
         return gameData[playerID].money;
     }
-    public bool IsSkinUnlocked(string playerID, int skinIndex)
-    {
-        if (gameData[playerID].skins[skinIndex] == true)
-        {
-            return true;
-        }
-        else
-        {
-            return false;
-        }
+
+    public bool IsSkinUnlocked(string playerId, string commonName) {
+        return gameData[playerId]?
+            .purchasedSkins
+            .Any(c => c.Equals(commonName, System.StringComparison.InvariantCultureIgnoreCase)) 
+            ?? false;
     }
-    public void UnlockSkinForPlayer(string playerID, int skinIndex)
-    {
-        gameData[playerID].skins[skinIndex] = true;
+
+    public void UnlockSkinForPlayer(string playerID, string commonName) {
+        var marbleList = FindObjectOfType<MarbleList>();
+        var skinIndex = marbleList.GetMarbleCodeFromCommonName(commonName);
+        var playerData = gameData[playerID];
+        if (!playerData.purchasedSkins.Any(s => s.Equals(commonName, System.StringComparison.InvariantCultureIgnoreCase)))
+            playerData.purchasedSkins.Add(commonName);
         SaveGameDataToTXT();
         Debug.Log("GAME DATA SUCCESFULLY SAVED!!!!");
     }
-    public void SetPlayerEquipSkin(string playerID, int skinIndex)
+
+    public void SetPlayerEquipSkin(string playerID, string commonName)
     {
-        gameData[playerID].equiptSkin = skinIndex;
+        var playerData = gameData[playerID];
+        playerData.selectedSkin = commonName;
         SaveGameDataToTXT();
         Debug.Log("GAME DATA SUCCESFULLY SAVED!!!!");
     }
-    public int GetPlayerEquipSkin(string playerID)
+
+    public string GetPlayerEquipSkin(string playerID)
     {
-        return gameData[playerID].equiptSkin;
+        var playerData = gameData[playerID];
+        if (string.IsNullOrWhiteSpace(playerData.selectedSkin))
+            return "default";
+        return playerData.selectedSkin;
     }
+
     public void SaveGameDataToTXT()
     {
         dataManager.NewSave(gameData);
         Debug.Log("GAME DATA SUCCESSFULLY SAVED!!!!");
     }
+
     public bool CheckIfPlayerSubscribedToWhispers(string playerID)
     {
         return gameData[playerID].isSubscribed;
@@ -125,16 +126,10 @@ public class GameData : MonoBehaviour
     {
         string playerID = e.userID;
         string playerName = e.displayName;
-        string skinList = playerName+": ";
-        for (int i = 0; i < gameData[playerID].skins.Count; i++)
-        {
-            if (gameData[playerID].skins[i] == true)
-            {
-                skinList += marbleList.marbleCodeToCommonName[i] + ", ";
-            }
-        }
-        return skinList;
+        var playerData = gameData[playerID];
+        return $"{playerName}: {string.Join(", ", playerData.purchasedSkins)}";
     }
+    
     public string ConvertCommonNameToUserID(string commonName)
     {
         //var myKey = dictionary.FirstOrDefault(x => x.Value == "one").Key;
@@ -149,6 +144,7 @@ public class GameData : MonoBehaviour
         }
         return "";
     }
+    
     public bool CheckPlayerIDMatchesUserName(string userID, string name)
     {
         if (gameData[userID].playerName == name)

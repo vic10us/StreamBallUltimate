@@ -164,14 +164,15 @@ public class Commands : MonoBehaviour
                 commonName += e.Command.ArgumentsAsList[index].ToLower();
             }*/
             Debug.Log(commonName);
+            // Check if the marble with that name exists in the Marble List
             if (marbleList.DoesMarbleCommonNameExist(commonName))
             {
+                // Check if the marble with that name is currently in the Shop
                 if (shop.MarbleNamesInShop(commonName))
                 {
                     int playerMoney = gameDataScript.CheckPlayerMoney(playerID);
                     int marbleCost = marbleList.GetMarbleCostFromCommonName(commonName);
-                    int marbleCode = marbleList.GetMarbleCodeFromCommonName(commonName);
-                    if (gameDataScript.IsSkinUnlocked(playerID, marbleCode))
+                    if (gameDataScript.IsSkinUnlocked(playerID, commonName))
                     {
                         chatClient.SendMessage(chatJoinedChannel, playerUserName + skinAlreadyUnlocked1 + commonName + skinAlreadyUnlocked2);
                     }
@@ -180,7 +181,7 @@ public class Commands : MonoBehaviour
                         if (playerMoney >= marbleCost)
                         {
                             gameDataScript.SubtractMoneyFromPlayerID(marbleCost, playerID);
-                            gameDataScript.UnlockSkinForPlayer(playerID, marbleCode);
+                            gameDataScript.UnlockSkinForPlayer(playerID, commonName);
                             int currentMoney = gameDataScript.CheckPlayerMoney(playerID);
                             chatClient.SendMessage(chatJoinedChannel, playerUserName + unlockedMarble1 +
                                 commonName + unlockedMarble2 + commonName + unlockedMarble3 + unlockedMarble4 + currentMoney);
@@ -237,11 +238,10 @@ public class Commands : MonoBehaviour
         {
             if (marbleList.DoesMarbleCommonNameExist(commonName))
             {
-                int marbleCode = marbleList.GetMarbleCodeFromCommonName(commonName);
-                if (gameDataScript.IsSkinUnlocked(playerID, marbleCode))
+                if (gameDataScript.IsSkinUnlocked(playerID, commonName))
                 {
-                    gameDataScript.SetPlayerEquipSkin(playerID, marbleCode);
-                    chatClient.SendMessage(chatJoinedChannel, playerUserName + ", you now have the " + commonName +" skin in use.");
+                    gameDataScript.SetPlayerEquipSkin(playerID, commonName);
+                    chatClient.SendMessage(chatJoinedChannel, $"{playerUserName}, you now have the {commonName} skin in use.");
                     Debug.Log(playerUserName+" equipt "+commonName );
                 }
                 else
@@ -281,8 +281,7 @@ public class Commands : MonoBehaviour
 
         if (gameDataScript.CheckIfPlayerExists(playerID))
         {
-            int marbleCode = gameDataScript.GetPlayerEquipSkin(playerID);
-            string commonName = marbleList.GetCommonNameFromMarbleCode(marbleCode);
+            var commonName = gameDataScript.GetPlayerEquipSkin(playerID);
             chatClient.SendMessage(chatJoinedChannel, playerUserName + " is using the " + commonName + " skin!");
         }
         else
@@ -408,7 +407,8 @@ public class Commands : MonoBehaviour
 
     public void Rotate(Arrrgs e) //Temporary command!!! TODO REMOVE
     {
-        if (e.userID == "73184979")
+        // if (e.userID == "73184979")
+        if (e.isAdmin)
         {
             FindObjectOfType<Shop>().ResetShop();
         }

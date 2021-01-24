@@ -409,7 +409,7 @@ SpriteMask:
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 0
-  m_Sprite: {fileID: 21300000, guid: 1b299251c908747438510b6e229acd64, type: 3}
+  m_Sprite: {fileID: 21300000, guid: 836f2591a4c394348b1708c26b2df7e1, type: 3}
   m_MaskAlphaCutoff: 1
   m_FrontSortingLayerID: 0
   m_BackSortingLayerID: 0
@@ -456,7 +456,7 @@ SpriteRenderer:
   m_SortingLayerID: -936207957
   m_SortingLayer: 1
   m_SortingOrder: 2
-  m_Sprite: {fileID: 21300000, guid: 77eda750570e1184e92c3f6de7251f3a, type: 3}
+  m_Sprite: {fileID: 21300000, guid: 836f2591a4c394348b1708c26b2df7e1, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
   m_FlipY: 0
@@ -516,7 +516,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 62db5dad49b31eb4dafeb8fc617d32ab, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  highJumpForce: 1
   playerID: 
   gameMarbleSprite: {fileID: 398284538722661472}
   playerName: {fileID: 2042765949961373427}
   marbleText: {fileID: 1817919679}
+  isrolling: 0
