@@ -27,12 +27,12 @@ public class Shop : MonoBehaviour
             shop.transform.SetParent(transform);
             Marble marble = item.GetComponent<Marble>();
             string name = marble.commonName;
-            string cost = marble.cost.ToString();
+            int cost = marble.cost;
             Sprite sprite = marble.marbleSprite;
 
             ShopObject newShopObject = shop.GetComponent<ShopObject>();
             newShopObject.marbleName.text = name;
-            newShopObject.marbleCost.text = "$" + cost;
+            newShopObject.marbleCost.text = $"${cost}";
             newShopObject.marbleSpriteRenderer.sprite = sprite;
 
             if (counter < shopObjectLocations.Length)

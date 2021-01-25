@@ -5,6 +5,7 @@ using SharpConfig;
 using System.IO;
 using System;
 using System.Linq;
+using Newtonsoft.Json;
 
 public class GameConfigurationManager: MonoBehaviour
 {
@@ -24,7 +25,6 @@ public class GameConfigurationManager: MonoBehaviour
             _config.SaveToFile(ConfigurationFile);
         }
         var c = GetGameConfiguration();
-        Debug.Log(JsonUtility.ToJson(c));
         c.LastRun = DateTimeOffset.UtcNow;
         SaveGameConfiguration(c);
         // lets do some config stuff

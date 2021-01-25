@@ -44,7 +44,7 @@ public class GameData : MonoBehaviour
         var marbleList = FindObjectOfType<MarbleList>();
         PlayerData tempData = new PlayerData();
         tempData.money = 0;
-        tempData.selectedSkin = marbleList.marbleCodeToCommonName[0];
+        tempData.selectedSkin = "default";
         tempData.playerName = e.displayName;
         tempData.isSubscribed = false;
         gameData.Add(e.userID, tempData);
@@ -86,7 +86,7 @@ public class GameData : MonoBehaviour
 
     public void UnlockSkinForPlayer(string playerID, string commonName) {
         var marbleList = FindObjectOfType<MarbleList>();
-        var skinIndex = marbleList.GetMarbleCodeFromCommonName(commonName);
+        // var skinIndex = marbleList.GetMarbleCodeFromCommonName(commonName);
         var playerData = gameData[playerID];
         if (!playerData.purchasedSkins.Any(s => s.Equals(commonName, System.StringComparison.InvariantCultureIgnoreCase)))
             playerData.purchasedSkins.Add(commonName);

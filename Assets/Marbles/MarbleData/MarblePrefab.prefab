@@ -43,8 +43,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6a1014f70423e684c8bb7580e869bec4, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  marbleCode: 0
-  commonName: 
-  cost: 0
+  commonName: unknown
+  cost: -1
   rarity: 0
   marbleSprite: {fileID: 0}
