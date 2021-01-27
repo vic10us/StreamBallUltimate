@@ -1,6 +1,4 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+﻿using System.Collections.Generic;
 
 public class PlayerData 
     //DATA that is stored in a dictionary and can be accessed by looking at the key which will be a player chat ID 

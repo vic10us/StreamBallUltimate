@@ -1,11 +1,6 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using TwitchLib.Client.Models;
-using TwitchLib.Unity;
-using TwitchLib.Client.Events;
-using System;
-using TMPro;
 
 public class JumpManager : MonoBehaviour
 {

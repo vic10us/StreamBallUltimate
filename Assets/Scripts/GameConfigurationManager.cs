@@ -1,11 +1,7 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 using SharpConfig;
 using System.IO;
 using System;
-using System.Linq;
-using Newtonsoft.Json;
 
 public class GameConfigurationManager: MonoBehaviour
 {

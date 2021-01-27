@@ -1,8 +1,6 @@
 ﻿using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 using TMPro;
-using System;
 
 public class MarbleObject : MonoBehaviour
 {
@@ -25,7 +23,6 @@ public class MarbleObject : MonoBehaviour
     [SerializeField] TextFollow marbleText;
     public bool isrolling;
     Commands commands;
-
     GameController gameController;
     string gameState;
 

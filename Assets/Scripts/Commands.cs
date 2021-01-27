@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using UnityEngine;
 using TwitchLib.Client.Models;
 using TwitchLib.Unity;
-using TwitchLib.Client.Events;
 using System;
 using System.Linq;
 using System.Text.RegularExpressions;
@@ -334,17 +333,17 @@ public class Commands : MonoBehaviour
 
         if (gameDataScript.CheckIfPlayerExists(userID))
         {
-            if (gameController.currentState == gameState.gametime)
+            if (gameController.currentState == GameState.GameTime)
             {
-                if (gameController.currentGameMode == gameMode.longjump)
+                if (gameController.currentGameMode == GameMode.LongJump)
                 {
                     jumpManager.CreateMarbleAndJump(e);
                 }
-                else if (gameController.currentGameMode == gameMode.highjump)
+                else if (gameController.currentGameMode == GameMode.HighJump)
                 {
                     jumpManager.CreateMarbleAndHighJump(e);
                 }
-                else if (gameController.currentGameMode == gameMode.race)
+                else if (gameController.currentGameMode == GameMode.Race)
                 {
 
                 }

@@ -1,5 +1,4 @@
-﻿using System.Collections;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using UnityEngine;
 using System.IO;
 using Newtonsoft.Json;
@@ -7,8 +6,8 @@ using Newtonsoft.Json;
 public class DataManager: MonoBehaviour
 {
     public PlayerData data;
-    public string file = "PlayerData.json";
-    public string GameDataPath = @"D:\SimpaGameBotData";
+    private static string file = "PlayerData.json";
+    private static string GameDataPath => Application.persistentDataPath; // @"D:\SimpaGameBotData";
     public string GameDataFile => Path.Combine(GameDataPath, file);
 
     public void Save()

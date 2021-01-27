@@ -12,10 +12,14 @@ public class MarbleList : MonoBehaviour
     [SerializeField] int maxEpic = 1000;
     [SerializeField] int maxLegendary = 2000;
     [SerializeField] GameObject MarblePrefab;
-    [SerializeField] string ExternalMarblesPath = @"D:\Media\CustomMarbles";
+    // [SerializeField] string ExternalMarblesPath = @"D:\Media\CustomMarbles";
     [SerializeField] List<GameObject> marbles;
 
-    private void LoadExternalMarbles(string path) {
+    private void LoadExternalMarbles() {
+        var loadMarbles = GlobalConfiguration.GetValue("marbles", "LoadExternalMarbles").Equals("true", StringComparison.InvariantCultureIgnoreCase);
+        var path = GlobalConfiguration.GetValue("marbles", "ExternalPath");
+        if (!loadMarbles || string.IsNullOrWhiteSpace(path)) return;
+        
         var marbleConfig = ConfigurationManager.GetConfig<MarbleInfos>(Path.Combine(path, "meta-data.json"), true);
         var marbleConfigMarbles = marbleConfig.Marbles.ToList();
         var currentMarbles = marbles.ToDictionary(m => m.name, m => m);
@@ -76,7 +80,7 @@ public class MarbleList : MonoBehaviour
         if (!marbles.Any()) return;
         if (MarblePrefab == null) return;
 
-        LoadExternalMarbles(ExternalMarblesPath);
+        LoadExternalMarbles();
 
         while (marbles.Count < 3) {
             var newMarble = CreateDummyMarble(RandomString(8));

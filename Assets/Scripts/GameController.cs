@@ -1,16 +1,13 @@
-﻿using System.Collections; // Don't eat TheBookSnail or you might get rat lungworm :0
-using System.Collections.Generic;
-using UnityEngine;
-using Newtonsoft.Json;
+﻿using UnityEngine;
 using TMPro;
 
-public enum gameState { downtime, cutscene, gametime };
-public enum gameMode { longjump, highjump, race };
+public enum GameState { DownTime, CutScene, GameTime };
+public enum GameMode { LongJump, HighJump, Race };
 public class GameController : MonoBehaviour
 {
     public DataManager dataManager;
-    public gameState currentState;
-    public gameMode currentGameMode;
+    public GameState currentState;
+    public GameMode currentGameMode;
     [SerializeField] TextMeshPro gameStateText;
     JumpManager jumpManager;
     public Shop gameShop;
@@ -23,8 +20,8 @@ public class GameController : MonoBehaviour
 
     void Start()
     {
-        currentGameMode = gameMode.longjump;
-        currentState = gameState.downtime;
+        currentGameMode = GameMode.LongJump;
+        currentState = GameState.DownTime;
         jumpManager = FindObjectOfType<JumpManager>();
         UpdateGameStateText();
     }
@@ -34,13 +31,13 @@ public class GameController : MonoBehaviour
         Debug.Log(currentState);
         switch (currentState)
         {
-            case gameState.downtime:
+            case GameState.DownTime:
                 gameStateText.text = "Down Time";
                 break;
-            case gameState.cutscene:
+            case GameState.CutScene:
                 gameStateText.text = "Cut Scene";
                 break;
-            case gameState.gametime:
+            case GameState.GameTime:
                 gameStateText.text = "Game Time";
                 break;
             default:
@@ -58,38 +55,41 @@ public class GameController : MonoBehaviour
 
     public void TriggerCutscene()
     {
-        currentState = gameState.cutscene;
+        currentState = GameState.CutScene;
         gameShop.gameObject.SetActive(false);
         nullCharacter.NullStartCutScene();
         UpdateGameStateText();
     }
+    
     public void TriggerGame()
     {
-        currentState = gameState.gametime;
+        currentState = GameState.GameTime;
         UpdateGameStateText();
         timer.ResetGameTimer();
     }
+
     public void TriggerDowntime()
     {
         shop.ResetShop();
-        currentState = gameState.downtime;
+        currentState = GameState.DownTime;
         UpdateGameStateText();
         timer.ResetDowntimeTimer();
         StartCoroutine(jumpManager.DestroyMarbles());
         nullCharacter.HideCharacter();
         gameShop.gameObject.SetActive(true);
     }
+
     public string FindGameState()
     {
         Debug.Log(currentGameMode);
         switch (currentGameMode)
         {
-            case gameMode.longjump:
+            case GameMode.LongJump:
                 return "Long Jump";
-            case gameMode.highjump:
+            case GameMode.HighJump:
                 Debug.Log("Launching High Jump");
                 return "High Jump";
-            case gameMode.race:
+            case GameMode.Race:
                 return "Race";
             default:
                 return "YOUR MOM";

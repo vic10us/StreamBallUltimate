@@ -1,11 +1,9 @@
 ﻿using System;
-using System.Collections;
-using System.Collections.Generic;
 using System.IO;
 using SharpConfig;
 using UnityEngine;
 
-public static class Secrets
+public static class GlobalConfiguration
 {
     public static string bot_name;
     public static string client_id;
@@ -19,10 +17,23 @@ public static class Secrets
     private static string ConfigurationFile => Path.Combine(ConfigurationPath, ConfigurationFileName);
 
     public static string GetValue(string scope, string key) {
-        return _config[scope][key]?.StringValue ?? Environment.GetEnvironmentVariable(key);
+        var result = (_config[scope][key]?.StringValue ?? "").Or(GetEnvironmentVariable($"sbu_{scope}_{key}"));
+        return result; // _config[scope][key]?.StringValue ?? GetEnvironmentVariable(key);
     }
 
-    public static void EnvironmentVariables()
+    static string Or(this string value, string alternative) {
+        return string.IsNullOrWhiteSpace(value) ? alternative : value;
+    }
+
+    public static string GetEnvironmentVariable(string name)
+    {
+        var envVar = name.Replace(' ', '_');
+        return Environment.GetEnvironmentVariable(envVar, EnvironmentVariableTarget.Process) ??
+               Environment.GetEnvironmentVariable(envVar, EnvironmentVariableTarget.User) ??
+               Environment.GetEnvironmentVariable(envVar, EnvironmentVariableTarget.Machine);
+    }
+
+    public static void LoadConfiguration()
     {
         if (File.Exists(ConfigurationFile)) {
             Debug.Log("Config file found. [Loading]");

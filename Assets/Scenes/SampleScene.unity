@@ -2119,8 +2119,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8d66ddb0b0c622d479c356b90867f668, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  file: PlayerData.json
-  GameDataPath: D:\SimpaGameBotData
 --- !u!4 &1881838429
 Transform:
   m_ObjectHideFlags: 0

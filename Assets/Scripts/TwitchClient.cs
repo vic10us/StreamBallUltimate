@@ -1,11 +1,9 @@
-﻿using System.Collections;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using UnityEngine;
 using TwitchLib.Client.Models;
 using TwitchLib.Unity;
 using TwitchLib.Client.Events;
 using System;
-using TwitchLib.PubSub.Events;
 using UnityEngine.UI;
 
 public class TwitchClient : MonoBehaviour
@@ -22,7 +20,7 @@ public class TwitchClient : MonoBehaviour
 
     private void Awake()
     {
-        Secrets.EnvironmentVariables();
+        GlobalConfiguration.LoadConfiguration();
     }
 
     void Start()
@@ -32,10 +30,10 @@ public class TwitchClient : MonoBehaviour
         Application.runInBackground = true;
 
         //set up bot and tell what channel to join
-        Debug.Log($"{Secrets.bot_name}: {Secrets.bot_access_token}");
-        bot_name = Secrets.bot_name;
-        channel_name = Secrets.channel_name;
-        ConnectionCredentials credentials = new ConnectionCredentials(Secrets.bot_name, Secrets.bot_access_token);
+        Debug.Log($"{GlobalConfiguration.bot_name}: {GlobalConfiguration.bot_access_token}");
+        bot_name = GlobalConfiguration.bot_name;
+        channel_name = GlobalConfiguration.channel_name;
+        ConnectionCredentials credentials = new ConnectionCredentials(GlobalConfiguration.bot_name, GlobalConfiguration.bot_access_token);
 
         client = new Client();
         client.Initialize(credentials, channel_name);

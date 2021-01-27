@@ -1,10 +1,7 @@
-﻿using System.Collections;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using UnityEngine;
-using TwitchLib.Client.Models;
 using TwitchLib.Unity;
 using TwitchLib.Api.Models.Undocumented.Chatters;
-using System;
 
 public class TwitchAPI : MonoBehaviour
 {
@@ -17,8 +14,8 @@ public class TwitchAPI : MonoBehaviour
     {
         Application.runInBackground = true;
         api = new Api();
-        api.Settings.AccessToken = Secrets.bot_access_token;
-        api.Settings.ClientId = Secrets.client_id;
+        api.Settings.AccessToken = GlobalConfiguration.bot_access_token;
+        api.Settings.ClientId = GlobalConfiguration.client_id;
         GameObject client = GameObject.Find("Client");
         twitchClient = client.GetComponent<TwitchClient>();
     }
