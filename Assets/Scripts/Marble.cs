@@ -11,7 +11,7 @@ public class Marble : MonoBehaviour
 
     void Start()
     {
-        marbleSprite = GetComponent<SpriteRenderer>().sprite;
+        // marbleSprite = GetComponent<SpriteRenderer>().sprite;
     }
 
     void Update()

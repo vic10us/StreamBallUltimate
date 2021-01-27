@@ -23,7 +23,7 @@ public class MarbleList : MonoBehaviour
         var marbleImageFileNames = marbleImageFiles.Select(mi => Path.GetFileName(mi));
         
         foreach (var info in marbleConfig.Marbles) {
-            Debug.LogWarning($"Found marble in config. Loading... {info.FileName}");
+            Debug.Log($"Found marble in config. Loading... {info.FileName}");
             var fileName = Path.Combine(path, info.FileName);
             if (!File.Exists(fileName)) continue;
             var newMarble = LoadNewMarble(info.CommonName, info.Rarity, fileName, info.Cost);
@@ -58,7 +58,7 @@ public class MarbleList : MonoBehaviour
 
         if (marbleConfig.IsDirty) {
             marbleConfig.Marbles = marbleConfigMarbles;
-            Debug.LogWarning($"{Path.Combine(path, "meta-data.json")}");
+            // Debug.LogWarning($"{Path.Combine(path, "meta-data.json")}");
             ConfigurationManager.SaveConfig(Path.Combine(path, "meta-data.json"), marbleConfig);
         }
     }

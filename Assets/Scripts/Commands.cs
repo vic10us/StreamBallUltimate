@@ -5,6 +5,13 @@ using TwitchLib.Client.Models;
 using TwitchLib.Unity;
 using TwitchLib.Client.Events;
 using System;
+using System.Linq;
+using System.Text.RegularExpressions;
+
+public class CommandHandler {
+    public bool Queue { get; set; } = true;
+    public Action<Arrrgs> Handle;
+}
 
 public class Commands : MonoBehaviour
 {
@@ -47,12 +54,39 @@ public class Commands : MonoBehaviour
     const string marbleNotInShop = " marble is not in shop";
     const string cantGiveMoneyToPlayer1 = "Can not give money to ";
     const string cantGiveMoneyToPlayer2 = " because they are not entered in the game.";
+    private Dictionary<Regex, CommandHandler> commandHandlers = new Dictionary<Regex, CommandHandler>();
 
     private void Start()
     {
+        commandHandlers.Add(new Regex("^help$"), new CommandHandler { Handle = Help });
+        commandHandlers.Add(new Regex("^join$"), new CommandHandler { Handle = Join });
+        commandHandlers.Add(new Regex("^buy$"), new CommandHandler { Handle = Buy });
+        commandHandlers.Add(new Regex("^equip$"), new CommandHandler { Handle = Equip });
+        commandHandlers.Add(new Regex("^money$"), new CommandHandler { Handle = Money });
+        commandHandlers.Add(new Regex("^inuse$"), new CommandHandler { Handle = InUse });
+        commandHandlers.Add(new Regex("^skins$"), new CommandHandler { Handle = Skins });
+        commandHandlers.Add(new Regex("^give$"), new CommandHandler { Handle = Give });
+        commandHandlers.Add(new Regex("^play$"), new CommandHandler { Queue = false, Handle = Play });
+        commandHandlers.Add(new Regex("^rotate$"), new CommandHandler { Queue = false, Handle = Rotate });
         //chatClient.SendMessage(chatJoinedChannel, help);
         //Setup();
     }
+
+    public CommandHandler GetCommandHandler(string commandName) {
+        var command = commandHandlers.FirstOrDefault(k => k.Key.IsMatch(commandName));
+        if (command.Value == null) Debug.LogWarning($"Command handler not found for: {commandName}");
+        return command.Value;
+    }
+
+    public void ExecuteCommand(Arrrgs a) {
+        var command = GetCommandHandler(a.commandText);
+        if (command == null) {
+            Debug.LogWarning($"Command handler not found for: {a.commandText}");
+            return;
+        }
+        command.Handle(a);
+    }
+
     public void Setup()
     {
         twitchClient = FindObjectOfType<TwitchClient>();
@@ -94,6 +128,7 @@ public class Commands : MonoBehaviour
             AttemptToJoin(e);
         }
     }
+
     private void AttemptToJoin(Arrrgs e)
     {
         if (gameDataScript.CheckIfPlayerExists(e.userID))
@@ -107,9 +142,8 @@ public class Commands : MonoBehaviour
         }
     }
 
-
     //Money - checks if player data exists - if so returns how much money they have in chat
-    public void money(Arrrgs e)
+    public void Money(Arrrgs e)
     {
         if (chatClient == null)
         {
@@ -136,20 +170,16 @@ public class Commands : MonoBehaviour
         }
     }
 
-
     //Buy - checks if player data exists - if so checks if has enough money - if so then unlock skin
     public void Buy(Arrrgs e)
     {
         if (chatClient == null)
         {
             Setup();
-            AttemptToBuy(e);
         }
-        else
-        {
-            AttemptToBuy(e);
-        }
+        AttemptToBuy(e);
     }
+    
     public void AttemptToBuy(Arrrgs e)
     {
         string commonName = "";
@@ -215,13 +245,10 @@ public class Commands : MonoBehaviour
         if (chatClient == null)
         {
             Setup();
-            AttemptToEquip(e);
         }
-        else
-        {
-            AttemptToEquip(e);
-        }
+        AttemptToEquip(e);
     }
+
     private void AttemptToEquip(Arrrgs e)
     {
         string commonName = "";
@@ -260,20 +287,16 @@ public class Commands : MonoBehaviour
         }
     }
 
-
     //Equipted - checks if player data exists - checks what skin they have equipped - tells them what skin that is
     public void InUse(Arrrgs e)
     {
         if (chatClient == null)
         {
             Setup();
-            AttemptToInUse(e);
         }
-        else
-        {
-            AttemptToInUse(e);
-        }
+        AttemptToInUse(e);
     }
+
     private void AttemptToInUse(Arrrgs e)
     {
         string playerID = e.userID;
@@ -290,6 +313,7 @@ public class Commands : MonoBehaviour
         }
 
     }
+
     public void Play(Arrrgs e)
     {
         if (chatClient == null)
@@ -335,6 +359,7 @@ public class Commands : MonoBehaviour
             chatClient.SendMessage(chatJoinedChannel, displayName + noPlayerEntryExists);
         }
     }
+
     //AcceptWhispers
     /*
     public void AcceptWhispers(OnChatCommandReceivedArgs e)
@@ -367,18 +392,16 @@ public class Commands : MonoBehaviour
         }
     }
     */
+
     public void Skins(Arrrgs e)
     {
         if (chatClient == null)
         {
             Setup();
-            AttemptToSkins(e);
         }
-        else
-        {
-            AttemptToSkins(e);
-        }
+        AttemptToSkins(e);
     }
+
     public void AttemptToSkins(Arrrgs e)
     {
         string userID = e.userID;
@@ -387,8 +410,9 @@ public class Commands : MonoBehaviour
         if (gameDataScript.CheckIfPlayerExists(userID))
         {
             string skinsPlayerOwns = gameDataScript.CheckSkins(e);
-            StartCoroutine(SkinsMessege(skinsPlayerOwns));
-            chatClient.SendMessage(chatJoinedChannel, "https://www.twitch.tv/simpagamebot");
+            // StartCoroutine(SkinsMessege(skinsPlayerOwns));
+            chatClient.SendMessage(chatJoinedChannel, skinsPlayerOwns);
+            //chatClient.SendMessage(chatJoinedChannel, "https://www.twitch.tv/simpagamebot");
         }
         else
         {
@@ -402,7 +426,7 @@ public class Commands : MonoBehaviour
     }
     public void AkaiEasterEgg(string name)
     {
-        chatClient.SendMessage(chatJoinedChannel,name + secretMsg);
+        chatClient.SendMessage(chatJoinedChannel, $"{name} is hacking!");
     }
 
     public void Rotate(Arrrgs e) //Temporary command!!! TODO REMOVE
@@ -413,6 +437,7 @@ public class Commands : MonoBehaviour
             FindObjectOfType<Shop>().ResetShop();
         }
     }
+
     public void Give(Arrrgs e)
     {
         if (chatClient == null)
@@ -425,66 +450,64 @@ public class Commands : MonoBehaviour
             AttemptToGive(e);
         }
     }
+
     public void AttemptToGive(Arrrgs e)
     {
-        if (e.multiCommand != null)
-        {
-            string userID = e.userID;
-            string displayName = e.displayName;
-            if (gameDataScript.CheckIfPlayerExists(userID))
-            {
-                if (e.multiCommand.Count >= 2)
-                {
-                    string otherPlayerDisplayName = e.multiCommand[0].TrimStart('@');
-                    string PersonGettingMoney = gameDataScript.ConvertCommonNameToUserID(otherPlayerDisplayName);
-                    if (String.IsNullOrEmpty(PersonGettingMoney))
-                    {
-                        chatClient.SendMessage(chatJoinedChannel, cantGiveMoneyToPlayer1 + otherPlayerDisplayName + cantGiveMoneyToPlayer2);
-                    }
-                    else
-                    {
-                        if (gameDataScript.CheckIfPlayerExists(PersonGettingMoney) &&
-                       gameDataScript.CheckPlayerIDMatchesUserName(PersonGettingMoney, otherPlayerDisplayName))
-                        {
-                            int cost;
-                            //money = int.TryParse((e.multiCommand[1]), money);
-                            if (int.TryParse((e.multiCommand[1]), out cost))
-                            {
-                                int currentMoney = gameDataScript.CheckPlayerMoney(userID);
-                                if (currentMoney >= cost)
-                                {
-                                    if (cost > 0 && cost<=10000)
-                                    {
-                                        gameDataScript.SubtractMoneyFromPlayerID(cost, userID);
-                                        gameDataScript.AddMoneyToPlayerID(cost, PersonGettingMoney);
-                                        chatClient.SendMessage(chatJoinedChannel, displayName+ " gave " + e.multiCommand[0] +" "+cost);
-                                    }
-                                    else
-                                    {
-                                        chatClient.SendMessage(chatJoinedChannel, displayName+" you can only give give between 1 and 10000");
-                                    }
-                                }
-                                else
-                                {
-                                    chatClient.SendMessage(chatJoinedChannel, displayName + " you can't give money you dont have.");
-                                }
-                            }
-                        }
-                        else
-                        {
-                            chatClient.SendMessage(chatJoinedChannel, cantGiveMoneyToPlayer1 + e.multiCommand[0] + cantGiveMoneyToPlayer2);
-                        }
-                    }
-                }
-                else
-                {
-                    chatClient.SendMessage(chatJoinedChannel, displayName+ " to give use !give [PlayerName] [Amount]");
-                }
-            }
-            else
-            {
-                chatClient.SendMessage(chatJoinedChannel, displayName + noPlayerEntryExists);
-            }
+        string userID = e.userID;
+        string displayName = e.displayName;
+
+        if (!gameDataScript.CheckIfPlayerExists(userID)) {
+            // user not found... tell them to join
+            chatClient.SendMessage(chatJoinedChannel, $"@{displayName}{noPlayerEntryExists}");
+            return;
         }
+
+        if (e.multiCommand?.Count < 2) {
+            // command is missin arguments show usage
+            chatClient.SendMessage(chatJoinedChannel, $"@{displayName}, to give use !give [PlayerName] [Amount]");
+            return;
+        }
+
+        string otherPlayerDisplayName = e.multiCommand[0].TrimStart('@');
+        string PersonGettingMoney = gameDataScript.ConvertCommonNameToUserID(otherPlayerDisplayName);
+        if (String.IsNullOrWhiteSpace(PersonGettingMoney))
+        {
+            // The player you are trying to send to doesn't exist...
+            chatClient.SendMessage(chatJoinedChannel, $"Can not give money to {e.multiCommand[0]} because they are not entered in the game.");
+            return;
+        }
+
+        if (!(gameDataScript.CheckIfPlayerExists(PersonGettingMoney) &&
+        gameDataScript.CheckPlayerIDMatchesUserName(PersonGettingMoney, otherPlayerDisplayName))) {
+            chatClient.SendMessage(chatJoinedChannel, $"Can not give money to {e.multiCommand[0]} because they are not entered in the game.");
+            return;
+        }
+
+        int cost;
+        if (!int.TryParse(e.multiCommand[1], out cost)) {
+            chatClient.SendMessage(chatJoinedChannel, $"'{e.multiCommand[1]}' is not a valid money amount.");
+            return;
+        }
+
+        if (e.isAdmin) {
+            gameDataScript.AddMoneyToPlayerID(cost, PersonGettingMoney);
+            chatClient.SendMessage(chatJoinedChannel, $"@{displayName} granted {e.multiCommand[0]} ${cost}");
+            return;
+        }
+
+        int currentMoney = gameDataScript.CheckPlayerMoney(userID);
+        if (currentMoney < cost)
+        {
+            chatClient.SendMessage(chatJoinedChannel, $"{displayName}, you can't give money you dont have.");
+        }
+
+        if (cost <= 0 || cost>10000)
+        {
+            chatClient.SendMessage(chatJoinedChannel, $"{displayName}, you can only give give between 1 and 10000");
+        }
+
+        gameDataScript.SubtractMoneyFromPlayerID(cost, userID);
+        gameDataScript.AddMoneyToPlayerID(cost, PersonGettingMoney);
+        chatClient.SendMessage(chatJoinedChannel, displayName+ " gave " + e.multiCommand[0] +" "+cost);
     }
 }

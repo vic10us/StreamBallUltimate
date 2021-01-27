@@ -1,10 +1,6 @@
-﻿using System.Collections;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using UnityEngine;
 using Newtonsoft.Json;
-using TwitchLib.Client.Models;
-using TwitchLib.Unity;
-using TwitchLib.Client.Events;
 using System.Linq;
 
 public class GameData : MonoBehaviour
@@ -30,15 +26,9 @@ public class GameData : MonoBehaviour
     public bool CheckIfPlayerExists(string playerID)
     {
         Debug.Log($"Checking if player with ID [{playerID}] exists in config");
-        if (gameData.ContainsKey(playerID) )
-        {
-            return true;
-        }
-        else
-        {
-            return false;
-        }
+        return gameData.ContainsKey(playerID);
     }
+
     public void CreateNewPlayerEntry(Arrrgs e)
     {
         var marbleList = FindObjectOfType<MarbleList>();
@@ -86,7 +76,6 @@ public class GameData : MonoBehaviour
 
     public void UnlockSkinForPlayer(string playerID, string commonName) {
         var marbleList = FindObjectOfType<MarbleList>();
-        // var skinIndex = marbleList.GetMarbleCodeFromCommonName(commonName);
         var playerData = gameData[playerID];
         if (!playerData.purchasedSkins.Any(s => s.Equals(commonName, System.StringComparison.InvariantCultureIgnoreCase)))
             playerData.purchasedSkins.Add(commonName);
@@ -116,45 +105,23 @@ public class GameData : MonoBehaviour
         Debug.Log("GAME DATA SUCCESSFULLY SAVED!!!!");
     }
 
-    public bool CheckIfPlayerSubscribedToWhispers(string playerID)
-    {
-        return gameData[playerID].isSubscribed;
-        //Returns true if player subscribed 
-    }
-
     public string CheckSkins(Arrrgs e)
     {
         string playerID = e.userID;
         string playerName = e.displayName;
         var playerData = gameData[playerID];
-        return $"{playerName}: {string.Join(", ", playerData.purchasedSkins)}";
+        return $"@{playerName} owns [{string.Join(", ", playerData.purchasedSkins)}]";
     }
     
     public string ConvertCommonNameToUserID(string commonName)
     {
-        //var myKey = dictionary.FirstOrDefault(x => x.Value == "one").Key;
-        playerDataList = new List<PlayerData>(gameData.Values);
-        for (int i = 0; i < playerDataList.Count; i++)
-        {
-            if (playerDataList[i].playerName.Equals(commonName,System.StringComparison.CurrentCultureIgnoreCase))
-            {
-                gameDataKeyList = new List<string>(gameData.Keys);
-                return gameDataKeyList[i];
-            }
-        }
-        return "";
+        var e = gameData.FirstOrDefault(kvp => kvp.Value.playerName.Equals(commonName, System.StringComparison.InvariantCultureIgnoreCase));
+        return e.Key ?? "";
     }
     
     public bool CheckPlayerIDMatchesUserName(string userID, string name)
     {
-        if (gameData[userID].playerName == name)
-        {
-            return true;
-        }
-        else
-        {
-            return false;
-        }
+        return gameData[userID].playerName == name;
     }
 
 }
