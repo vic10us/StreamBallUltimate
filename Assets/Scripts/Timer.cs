@@ -1,20 +1,27 @@
-﻿using UnityEngine;
+﻿#pragma warning disable 649
+
+using UnityEngine;
 using TMPro;
+using System;
 
 public class Timer : MonoBehaviour
 {
     public float timeRemaining = 65;
     public bool timerIsRunning = false;
     public TextMeshPro timeText;
+    
     [SerializeField] float timeBetweenGames = 600;
     [SerializeField] float timeOfGame = 90;
     [SerializeField] GameController gameController;
-    bool wasGameTime;
+
+    public bool wasGameTime;
+    
     void Start()
     {
         timerIsRunning = true;
         wasGameTime = true;
     }
+
     void Update()
     {
         if (timerIsRunning)
@@ -28,12 +35,12 @@ public class Timer : MonoBehaviour
             {
                 timerIsRunning = false;
                 timeRemaining = 0;
-                if (wasGameTime == true)
+                if (wasGameTime)
                 {
                     gameController.TriggerCutscene();
                     wasGameTime = false;
                 }
-                else 
+                else
                 {
                     gameController.TriggerDowntime();
                     wasGameTime = true;
@@ -41,19 +48,24 @@ public class Timer : MonoBehaviour
             }
         }
     }
-    void DisplayTime(float timeToDisplay)
+
+    public void DisplayTime(float timeToDisplay)
     {
         timeToDisplay += 1;
-        float minutes = Mathf.FloorToInt(timeToDisplay / 60);
-        float seconds = Mathf.FloorToInt(timeToDisplay % 60);
-
-        timeText.text = string.Format("{0:00}:{1:00}", minutes, seconds);
+        var x = TimeSpan.FromSeconds(timeToDisplay);
+        timeText.text = Math.Floor(x.TotalSeconds) > 0 ? 
+            x.Minutes > 0 ? 
+                $"{x:%m'm '%s's'}" : 
+                $"{x:%s}s" : 
+                "";
     }
+
     public void ResetGameTimer()
     {
         timeRemaining = timeOfGame;
         timerIsRunning = true;
     }
+
     public void ResetDowntimeTimer()
     {
         timeRemaining = timeBetweenGames;

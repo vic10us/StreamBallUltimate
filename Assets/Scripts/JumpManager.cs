@@ -1,4 +1,6 @@
-﻿using System.Collections;
+﻿#pragma warning disable 649
+
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -99,14 +101,15 @@ public class JumpManager : MonoBehaviour
     {
         MarbleObject[] allMarbles = GetComponentsInChildren<MarbleObject>();
 
-            foreach (var marble in allMarbles)
+        foreach (var marble in allMarbles)
+        {
+            while (marble.isrolling == true)
             {
-                while (marble.isrolling == true)
-                {
-                    yield return new WaitForSeconds(0.5f);
-                }
+                yield return new WaitForSeconds(0.5f);
             }
-        yield return new WaitForSeconds(5f);
+        }
+
+        // yield return new WaitForSeconds(5f);
         foreach (Transform child in this.transform)
         {
             Destroy(child.gameObject);
@@ -115,11 +118,10 @@ public class JumpManager : MonoBehaviour
         orderInLayer = 0;
     }
 
-
-        //playerMarble.marbleSprite = 
-        /*playerMarble = mb.GetComponent<Marble>();
-        playerSpriteRenderer = mb.GetComponent<SpriteRenderer>();
-        playerMarble.playerName
-        e.Command.ChatMessage.Username*/
-    }
+    //playerMarble.marbleSprite = 
+    /*playerMarble = mb.GetComponent<Marble>();
+    playerSpriteRenderer = mb.GetComponent<SpriteRenderer>();
+    playerMarble.playerName
+    e.Command.ChatMessage.Username*/
+}
 

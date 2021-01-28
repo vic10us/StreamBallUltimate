@@ -48,6 +48,7 @@ MonoBehaviour:
   maxRare: 400
   maxEpic: 1000
   maxLegendary: 2000
-  marbleArraySetToFalse: 
+  MarblePrefab: {fileID: 8276997573460607586, guid: f2a554c6af9b76e4fa61fd23d151125c,
+    type: 3}
   marbles:
-
+  - {fileID: 7811255160247077650, guid: 44ec36afa2c0e414eaf7d2a5ee1cb308, type: 3}

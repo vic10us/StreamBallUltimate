@@ -1,4 +1,6 @@
-﻿using System.Collections;
+﻿#pragma warning disable 649
+
+using System.Collections;
 using UnityEngine;
 
 public class Null : MonoBehaviour
@@ -10,17 +12,18 @@ public class Null : MonoBehaviour
         gameObject.SetActive(false);
     }
 
-    public void NullStartCutScene()
+    public void NullStartCutScene(int wait = 10)
     {
         gameObject.SetActive(true);
-        StartCoroutine(StartingDialogue());
+        StartCoroutine(StartingDialogue(wait));
     }
 
-    IEnumerator StartingDialogue()
+    IEnumerator StartingDialogue(int wait = 10)
     {
-        yield return new WaitForSeconds(10);
+        yield return new WaitForSeconds(wait);
         gameController.TriggerGame();
     }
+
     public void HideCharacter()
     {
         gameObject.SetActive(false);

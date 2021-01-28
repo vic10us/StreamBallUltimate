@@ -1,4 +1,6 @@
-﻿using System.Collections.Generic;
+﻿#pragma warning disable 649
+
+using System.Collections.Generic;
 using UnityEngine;
 using TwitchLib.Client.Models;
 using TwitchLib.Unity;
@@ -69,14 +71,16 @@ public class TwitchClient : MonoBehaviour
     private void MyCommandReceivedFunction(object sender, OnChatCommandReceivedArgs e)
     {
         Arrrgs chatArgs = new Arrrgs();
+        chatArgs.MessageType = MessageType.Command;
         chatArgs.isMod = e.Command.ChatMessage.IsModerator;
         chatArgs.isBroadcaster = e.Command.ChatMessage.IsBroadcaster;
         chatArgs.message = e.Command.ChatMessage.Message;
         chatArgs.userID = e.Command.ChatMessage.UserId;
         chatArgs.displayName = e.Command.ChatMessage.DisplayName;
-        chatArgs.commandText = e.Command.CommandText.ToLower();
+        chatArgs.commandText = e.Command.CommandText;
         chatArgs.multiCommand = e.Command.ArgumentsAsList;
-        
+        chatArgs.argumentsAsString = e.Command.ArgumentsAsString;
+
         for (int index = 0; index < e.Command.ArgumentsAsList.Count; index++)
         {
             chatArgs.commandArgs += e.Command.ArgumentsAsList[index].ToLower();
@@ -91,9 +95,11 @@ public class TwitchClient : MonoBehaviour
     {
         Debug.Log(e.ChatMessage.UserId);
     }
+
     private void Client_OnWhisperReceived(object sender, OnWhisperReceivedArgs e)
     {
         Arrrgs chatArgs = new Arrrgs();
+        chatArgs.MessageType = MessageType.Whisper;
         chatArgs.message = e.WhisperMessage.Message;
         chatArgs.userID = e.WhisperMessage.UserId;
         chatArgs.displayName = e.WhisperMessage.DisplayName;
@@ -101,6 +107,7 @@ public class TwitchClient : MonoBehaviour
         chatArgs.commandArgs = ConvertWhisperToArguments(e.WhisperMessage.Message);
         commandQueue.FirstCommandBuckets(chatArgs);
     }
+
     private string ConvertWhisperToCommand(string whisper)
     {
         if (string.IsNullOrEmpty(whisper))
@@ -109,11 +116,9 @@ public class TwitchClient : MonoBehaviour
         }
         else
         {
-
-                whisper = whisper.Substring(1);
-                string[] commandArray = whisper.Split(new char[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
-                return (commandArray[0].ToLower());
-
+            whisper = whisper.Substring(1);
+            string[] commandArray = whisper.Split(new char[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
+            return (commandArray[0].ToLower());
         }
     }
     

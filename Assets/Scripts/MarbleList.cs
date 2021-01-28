@@ -1,4 +1,6 @@
-﻿using System;
+﻿#pragma warning disable 649
+
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -15,12 +17,33 @@ public class MarbleList : MonoBehaviour
     // [SerializeField] string ExternalMarblesPath = @"D:\Media\CustomMarbles";
     [SerializeField] List<GameObject> marbles;
 
-    private void LoadExternalMarbles() {
+    public int SetMarbleCost(string commonName, int newCost) {
+        
+        var marbleConfig = GetMarbleConfig();
+        if (marbleConfig == null) return -1;
+        var path = GlobalConfiguration.GetValue("marbles", "ExternalPath");
+        var marblesToUpdate = marbleConfig.Marbles.Where(m => m.CommonName.Equals(commonName, StringComparison.InvariantCultureIgnoreCase));
+        if (!marblesToUpdate.Any()) return -2;
+        foreach (var marble in marblesToUpdate) {
+            marble.Cost = newCost;
+        }
+        ConfigurationManager.SaveConfig(Path.Combine(path, "meta-data.json"), marbleConfig);
+        return 1;
+    }
+
+    private MarbleInfos GetMarbleConfig() {
         var loadMarbles = GlobalConfiguration.GetValue("marbles", "LoadExternalMarbles").Equals("true", StringComparison.InvariantCultureIgnoreCase);
         var path = GlobalConfiguration.GetValue("marbles", "ExternalPath");
-        if (!loadMarbles || string.IsNullOrWhiteSpace(path)) return;
-        
+        if (!loadMarbles || string.IsNullOrWhiteSpace(path)) return null;
         var marbleConfig = ConfigurationManager.GetConfig<MarbleInfos>(Path.Combine(path, "meta-data.json"), true);
+        return marbleConfig;
+    }
+
+    private void LoadExternalMarbles() {
+        var marbleConfig = GetMarbleConfig();
+        if (marbleConfig == null) return;
+        var path = GlobalConfiguration.GetValue("marbles", "ExternalPath");
+
         var marbleConfigMarbles = marbleConfig.Marbles.ToList();
         var currentMarbles = marbles.ToDictionary(m => m.name, m => m);
         var marbleImageFiles = Directory.GetFiles(path, "*.png");
@@ -82,10 +105,10 @@ public class MarbleList : MonoBehaviour
 
         LoadExternalMarbles();
 
-        while (marbles.Count < 3) {
-            var newMarble = CreateDummyMarble(RandomString(8));
-            marbles.Add(newMarble);
-        }
+        // while (marbles.Count < 5) {
+        //     var newMarble = CreateDummyMarble(RandomString(8));
+        //     marbles.Add(newMarble);
+        // }
 
         foreach (var item in marbles)
         {
@@ -196,16 +219,19 @@ public class MarbleList : MonoBehaviour
 
     public HashSet<GameObject> GetMarblesForShop(int howManyMarbles)
     {
-        int marbleLength = marbles.Count;
         HashSet<GameObject> returnedMarbles = new HashSet<GameObject>();
         if (!marbles.Any()) {
             Debug.LogError("There are NO marbles to load into the shop. :(");
             return returnedMarbles;
         }
-        do { 
+
+        int marbleLength = marbles.Count;
+        var fetchCount = Math.Min(howManyMarbles, marbles.Count);
+
+        do {
             int marbleCode = UnityEngine.Random.Range(0, marbleLength);
             returnedMarbles.Add(marbles[marbleCode]);
-        } while (returnedMarbles.Count<howManyMarbles);
+        } while (returnedMarbles.Count < fetchCount);
         foreach (var item in returnedMarbles)
         {
             Debug.Log(item.GetComponent<Marble>().commonName);
@@ -215,7 +241,7 @@ public class MarbleList : MonoBehaviour
 
     public Marble GetMarble(string commonName)
     {
-        return GetMarbleGameObject(commonName).GetComponent<Marble>();
+        return GetMarbleGameObject(commonName)?.GetComponent<Marble>();
     }
 
     public GameObject GetMarbleGameObject(string commonName) {

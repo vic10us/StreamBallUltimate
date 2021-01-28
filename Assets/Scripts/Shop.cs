@@ -1,4 +1,7 @@
-﻿using System.Collections.Generic;
+﻿#pragma warning disable 649
+
+using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 
 public class Shop : MonoBehaviour
@@ -16,9 +19,9 @@ public class Shop : MonoBehaviour
     }
 
     //Creates a shop Object -> sets its name cost and sprite from the Marble List
-    public void DisplayShopItems()
+    public void DisplayShopItems(bool regenerate = true)
     {
-        Generate3ShopItems();
+        if (regenerate) GenerateShopItems();
         int counter = 0;
         foreach (var item in shopMarbles)
         {
@@ -34,24 +37,31 @@ public class Shop : MonoBehaviour
             newShopObject.marbleCost.text = $"${cost}";
             newShopObject.marbleSpriteRenderer.sprite = sprite;
 
-            if (counter < shopObjectLocations.Length)
-            {
-                shop.transform.position = shopObjectLocations[counter].position;
-            }
+            var offset  = counter * 1.5f;
+            var posY = 3f - offset;
+            var shopPos = shopObjectLocations[0].position;
+            shopPos.y = posY;
+            shop.transform.position = shopPos;
+
+            // if (counter < shopObjectLocations.Length)
+            // {
+            //     shop.transform.position = shopObjectLocations[counter].position;
+            // }
             counter++;
         }
     }
 
-    private void Generate3ShopItems()
+    private void GenerateShopItems()
     {
-        shopMarbles = marbleList.GetMarblesForShop(3);
+        shopMarbles = marbleList.GetMarblesForShop(5);
     }
 
-    public void ResetShop()
+    public void ResetShop(bool regenerate = true)
     {
         DestroyShopObjectChildren();
-        DisplayShopItems();
+        DisplayShopItems(regenerate);
     }
+
     private void Update()
     {
         if (Input.GetKeyDown(KeyCode.R))
@@ -59,6 +69,7 @@ public class Shop : MonoBehaviour
             ResetShop();
         }
     }
+
     public void DestroyShopObjectChildren()
     {
         foreach (Transform child in this.transform)
@@ -66,6 +77,7 @@ public class Shop : MonoBehaviour
             Destroy(child.gameObject);
         }
     }
+
     public bool MarbleNamesInShop(string checkedMarble)
     {
         bool marbleInShop = false;
@@ -79,5 +91,9 @@ public class Shop : MonoBehaviour
             }
         }
         return marbleInShop;
+    }
+
+    public IEnumerable<Marble> MarblesInShop() {
+        return shopMarbles.Select(m => m.GetComponent<Marble>());
     }
 }

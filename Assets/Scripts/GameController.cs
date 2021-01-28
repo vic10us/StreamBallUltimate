@@ -1,4 +1,6 @@
-﻿using UnityEngine;
+﻿#pragma warning disable 649
+
+using UnityEngine;
 using TMPro;
 
 public enum GameState { DownTime, CutScene, GameTime };
@@ -49,18 +51,34 @@ public class GameController : MonoBehaviour
     {
         if (Input.GetKeyDown("space"))
         {
-            jumpManager.DestroyMarbles();
+            StartCoroutine(jumpManager.DestroyMarbles());
+        }
+        if (Input.GetKeyDown(KeyCode.P)) {
+            PlayNow();
+        }
+        if (Input.GetKeyDown(KeyCode.S)) {
+            DowntimeNow();
         }
     }
 
-    public void TriggerCutscene()
+    public void PlayNow() {
+        timer.wasGameTime = false;
+        TriggerCutscene(0);
+    }
+
+    public void DowntimeNow() {
+        timer.wasGameTime = true;
+        TriggerDowntime();
+    }
+
+    public void TriggerCutscene(int wait = 10)
     {
         currentState = GameState.CutScene;
         gameShop.gameObject.SetActive(false);
-        nullCharacter.NullStartCutScene();
+        nullCharacter.NullStartCutScene(wait);
         UpdateGameStateText();
     }
-    
+
     public void TriggerGame()
     {
         currentState = GameState.GameTime;

@@ -1,4 +1,6 @@
-﻿using System.Collections;
+﻿#pragma warning disable 649
+
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using TwitchLib.Client.Models;
@@ -6,11 +8,7 @@ using TwitchLib.Unity;
 using System;
 using System.Linq;
 using System.Text.RegularExpressions;
-
-public class CommandHandler {
-    public bool Queue { get; set; } = true;
-    public Action<Arrrgs> Handle;
-}
+using System.IO;
 
 public class Commands : MonoBehaviour
 {
@@ -33,18 +31,17 @@ public class Commands : MonoBehaviour
     [SerializeField] GameController gameController;
     [SerializeField] JumpManager jumpManager;
     [SerializeField] Shop shop;
-    const string secretMsg = " is hacking";
     const string help = "!join-join the game | !play-play the game when it is GAMETIME | play to earn money" +
         " |  save money to buy and equip new marbles";
-    const string playerAlreadyExists = " your user entry already exists, no need to join";
+    //const string playerAlreadyExists = " your user entry already exists, no need to join";
     const string noPlayerEntryExists = ", Please type '!join' to play";
-    const string playerEntryAdded = " you have joined the game";
+    //const string playerEntryAdded = " you have joined the game";
     const string noMarbleWithNameExists = ", there is no marble with that name. Please type a valid marble name.";
     const string unlockedMarble1 = " has unlocked the ";
     const string unlockedMarble2 = " marble. Use '!equip ";
     const string unlockedMarble3 = "' to use your new marble.";
     const string unlockedMarble4 = " Current Balance: ";
-    const string notEnoughMoney = ", you do not have enough money to unlock ";
+    // const string notEnoughMoney = ", you do not have enough money to unlock ";
     const string skinAlreadyUnlocked1 = ", you already have the ";
     const string skinAlreadyUnlocked2 = " marble unlocked.";
     const string dontOwnThatSkin = ", you dont own that skin. Type !skins to see the skins you own.";
@@ -65,6 +62,9 @@ public class Commands : MonoBehaviour
         commandHandlers.Add(new Regex("^inuse$"), new CommandHandler { Handle = InUse });
         commandHandlers.Add(new Regex("^skins$"), new CommandHandler { Handle = Skins });
         commandHandlers.Add(new Regex("^give$"), new CommandHandler { Handle = Give });
+        commandHandlers.Add(new Regex("^price$"), new CommandHandler { Handle = Price });
+        commandHandlers.Add(new Regex("^store$"), new CommandHandler { Handle = Store });
+        commandHandlers.Add(new Regex("^setprice$"), new CommandHandler { Handle = SetPrice });
         commandHandlers.Add(new Regex("^play$"), new CommandHandler { Queue = false, Handle = Play });
         commandHandlers.Add(new Regex("^rotate$"), new CommandHandler { Queue = false, Handle = Rotate });
         //chatClient.SendMessage(chatJoinedChannel, help);
@@ -97,266 +97,175 @@ public class Commands : MonoBehaviour
     //Help - provids a list of commands
     public void Help(Arrrgs e)
     {
-        if (chatClient == null)
-        {
-            Setup();
-            //chatClient.SendMessage(chatJoinedChannel, help);
-            AttemptToHelp(e);
-        }
-        else
-        {
-            AttemptToHelp(e);
-        }
-    }
-
-    private void AttemptToHelp(Arrrgs e)
-    {
+        EnsureConnected();
         chatClient.SendMessage(chatJoinedChannel, help);
     }
 
     //Join - check if player data exists - if not create empty player data entry
     public void Join (Arrrgs e)
     {
-        if (chatClient == null)
-        {
-            Setup();
-            AttemptToJoin(e);
-        }
-        else
-        {
-            AttemptToJoin(e);
-        }
-    }
-
-    private void AttemptToJoin(Arrrgs e)
-    {
+        EnsureConnected();
         if (gameDataScript.CheckIfPlayerExists(e.userID))
         {
-            chatClient.SendMessage(chatJoinedChannel, e.displayName + playerAlreadyExists);
+            chatClient.SendMessage(chatJoinedChannel, $"@{e.displayName} your user entry already exists, no need to join.");
+            return;
         }
-        else
-        {
-            gameDataScript.CreateNewPlayerEntry(e);
-            chatClient.SendMessage(chatJoinedChannel, e.displayName + playerEntryAdded);
-        }
+        gameDataScript.CreateNewPlayerEntry(e);
+        chatClient.SendMessage(chatJoinedChannel, $"@{e.displayName} you have joined the game.");
     }
 
     //Money - checks if player data exists - if so returns how much money they have in chat
     public void Money(Arrrgs e)
     {
-        if (chatClient == null)
-        {
-            Setup();
-            AttemptToCheckMoney(e);
-        }
-        else
-        {
-            AttemptToCheckMoney(e);
-        }
-    }
-    private void AttemptToCheckMoney(Arrrgs e)
-    {
+        if (chatClient == null) Setup();
         string playerID = e.userID;
         string userName = e.displayName;
 
-        if (gameDataScript.CheckIfPlayerExists(playerID))
+        if (!gameDataScript.CheckIfPlayerExists(playerID))
         {
-            chatClient.SendMessage(chatJoinedChannel, userName + " money: " + gameDataScript.CheckPlayerMoney(playerID));
+            chatClient.SendMessage(chatJoinedChannel, $"@{userName}{noPlayerEntryExists}");
+            return;
         }
-        else
-        {
-            chatClient.SendMessage(chatJoinedChannel, userName + noPlayerEntryExists);
-        }
+
+        chatClient.SendMessage(chatJoinedChannel, $"@{userName} money: ${gameDataScript.CheckPlayerMoney(playerID)}");
     }
 
     //Buy - checks if player data exists - if so checks if has enough money - if so then unlock skin
     public void Buy(Arrrgs e)
     {
-        if (chatClient == null)
-        {
-            Setup();
-        }
-        AttemptToBuy(e);
-    }
-    
-    public void AttemptToBuy(Arrrgs e)
-    {
-        string commonName = "";
+        EnsureConnected();
         string playerID = e.userID; //Command.ChatMessage.UserId;
         string playerUserName = e.displayName; //Command.ChatMessage.Username;
-        if (gameDataScript.CheckIfPlayerExists(playerID))
-        {
-            commonName = e.commandArgs;
-            /*
-            for (int index = 0; index < e.Command.ArgumentsAsList.Count; index++)
-            {
-                commonName += e.Command.ArgumentsAsList[index].ToLower();
-            }*/
-            Debug.Log(commonName);
-            // Check if the marble with that name exists in the Marble List
-            if (marbleList.DoesMarbleCommonNameExist(commonName))
-            {
-                // Check if the marble with that name is currently in the Shop
-                if (shop.MarbleNamesInShop(commonName))
-                {
-                    int playerMoney = gameDataScript.CheckPlayerMoney(playerID);
-                    int marbleCost = marbleList.GetMarbleCostFromCommonName(commonName);
-                    if (gameDataScript.IsSkinUnlocked(playerID, commonName))
-                    {
-                        chatClient.SendMessage(chatJoinedChannel, playerUserName + skinAlreadyUnlocked1 + commonName + skinAlreadyUnlocked2);
-                    }
-                    else
-                    {
-                        if (playerMoney >= marbleCost)
-                        {
-                            gameDataScript.SubtractMoneyFromPlayerID(marbleCost, playerID);
-                            gameDataScript.UnlockSkinForPlayer(playerID, commonName);
-                            int currentMoney = gameDataScript.CheckPlayerMoney(playerID);
-                            chatClient.SendMessage(chatJoinedChannel, playerUserName + unlockedMarble1 +
-                                commonName + unlockedMarble2 + commonName + unlockedMarble3 + unlockedMarble4 + currentMoney);
-                        }
-                        else
-                        {
-                            chatClient.SendMessage(chatJoinedChannel, playerUserName + notEnoughMoney + commonName);
-                        }
-                    }
-                }
-                else
-                {
-                    chatClient.SendMessage(chatJoinedChannel, commonName + marbleNotInShop);
-                }
-            }
-            else
-            {
-                chatClient.SendMessage(chatJoinedChannel, playerUserName + noMarbleWithNameExists);
-            }
-        }
-        else
+        if (!gameDataScript.CheckIfPlayerExists(playerID))
         {
             chatClient.SendMessage(chatJoinedChannel, playerUserName + noPlayerEntryExists);
+            return;
         }
-    }
 
-
-    //Equip - checks if player data exists - checks if they own that skin - equips the skin
-    public void Equip(Arrrgs e)
-    {
-        if (chatClient == null)
-        {
-            Setup();
-        }
-        AttemptToEquip(e);
-    }
-
-    private void AttemptToEquip(Arrrgs e)
-    {
-        string commonName = "";
-        string playerID = e.userID;
-        string playerUserName = e.displayName;
-        commonName = e.commandArgs;
+        var commonName = e.commandArgs;
         /*
         for (int index = 0; index < e.Command.ArgumentsAsList.Count; index++)
         {
             commonName += e.Command.ArgumentsAsList[index].ToLower();
         }*/
 
-        if (gameDataScript.CheckIfPlayerExists(playerID))
+        // Check if the marble with that name exists in the Marble List
+        if (!marbleList.DoesMarbleCommonNameExist(commonName))
         {
-            if (marbleList.DoesMarbleCommonNameExist(commonName))
-            {
-                if (gameDataScript.IsSkinUnlocked(playerID, commonName))
-                {
-                    gameDataScript.SetPlayerEquipSkin(playerID, commonName);
-                    chatClient.SendMessage(chatJoinedChannel, $"{playerUserName}, you now have the {commonName} skin in use.");
-                    Debug.Log(playerUserName+" equipt "+commonName );
-                }
-                else
-                {
-                    chatClient.SendMessage(chatJoinedChannel, playerUserName + dontOwnThatSkin);
-                }
-            }
-            else
-            {
-                chatClient.SendMessage(chatJoinedChannel, playerUserName + noMarbleWithNameExists);
-            }
+            chatClient.SendMessage(chatJoinedChannel, playerUserName + noMarbleWithNameExists);
+            return;
         }
-        else
+
+        // Check if the marble with that name is currently in the Shop
+        if (!shop.MarbleNamesInShop(commonName))
         {
-            chatClient.SendMessage(chatJoinedChannel, playerUserName + noPlayerEntryExists);
+            chatClient.SendMessage(chatJoinedChannel, commonName + marbleNotInShop);
+            return;
         }
+
+        int playerMoney = gameDataScript.CheckPlayerMoney(playerID);
+        int marbleCost = marbleList.GetMarbleCostFromCommonName(commonName);
+        if (gameDataScript.IsSkinUnlocked(playerID, commonName))
+        {
+            chatClient.SendMessage(chatJoinedChannel, playerUserName + skinAlreadyUnlocked1 + commonName + skinAlreadyUnlocked2);
+            return;
+        }
+
+        if (playerMoney < marbleCost)
+        {
+            chatClient.SendMessage(chatJoinedChannel, $"{playerUserName}, you do not have enough money to unlock {commonName}. Balance: {playerMoney}");
+            return;
+        }
+
+        gameDataScript.SubtractMoneyFromPlayerID(marbleCost, playerID);
+        gameDataScript.UnlockSkinForPlayer(playerID, commonName);
+        int currentMoney = gameDataScript.CheckPlayerMoney(playerID);
+        chatClient.SendMessage(chatJoinedChannel, playerUserName + unlockedMarble1 +
+            commonName + unlockedMarble2 + commonName + unlockedMarble3 + unlockedMarble4 + currentMoney);
+    }
+
+
+    //Equip - checks if player data exists - checks if they own that skin - equips the skin
+    public void Equip(Arrrgs e)
+    {
+        EnsureConnected();
+        var playerID = e.userID;
+        var playerUserName = e.displayName;
+        var commonName = e.commandArgs;
+
+        // Check if the player has joined
+        if (!gameDataScript.CheckIfPlayerExists(playerID))
+        {
+            chatClient.SendMessage(chatJoinedChannel, $"@{playerUserName}{noPlayerEntryExists}");
+            return;
+        }
+
+        // Check if the marble exists
+        if (!marbleList.DoesMarbleCommonNameExist(commonName))
+        {
+            chatClient.SendMessage(chatJoinedChannel, $"@{playerUserName}{noMarbleWithNameExists}");
+            return;
+        }
+
+        // Check if the user owns that skin
+        if (!gameDataScript.IsSkinUnlocked(playerID, commonName))
+        {
+            chatClient.SendMessage(chatJoinedChannel, playerUserName + dontOwnThatSkin);
+            return;
+        }
+
+        gameDataScript.SetPlayerEquipSkin(playerID, commonName);
+        chatClient.SendMessage(chatJoinedChannel, $"{playerUserName}, you now have the {commonName} skin in use.");
+        Debug.Log(playerUserName + " equipt " + commonName);
     }
 
     //Equipted - checks if player data exists - checks what skin they have equipped - tells them what skin that is
     public void InUse(Arrrgs e)
     {
-        if (chatClient == null)
-        {
-            Setup();
-        }
-        AttemptToInUse(e);
-    }
-
-    private void AttemptToInUse(Arrrgs e)
-    {
+        EnsureConnected();
         string playerID = e.userID;
         string playerUserName = e.displayName;
 
-        if (gameDataScript.CheckIfPlayerExists(playerID))
+        if (!gameDataScript.CheckIfPlayerExists(playerID))
         {
-            var commonName = gameDataScript.GetPlayerEquipSkin(playerID);
-            chatClient.SendMessage(chatJoinedChannel, playerUserName + " is using the " + commonName + " skin!");
-        }
-        else
-        {
-            chatClient.SendMessage(chatJoinedChannel, playerUserName + noPlayerEntryExists);
+            chatClient.SendMessage(chatJoinedChannel, $"@{playerUserName}{noPlayerEntryExists}");
+            return;
         }
 
+        var commonName = gameDataScript.GetPlayerEquipSkin(playerID);
+        chatClient.SendMessage(chatJoinedChannel, $"@{playerUserName}, is using the {commonName} skin!");
     }
 
     public void Play(Arrrgs e)
     {
-        if (chatClient == null)
-        {
-            Setup();
-            AttemptToPlay(e);
-        }
-        else
-        {
-            AttemptToPlay(e);
-        }
-    }
-
-    private void AttemptToPlay(Arrrgs e)
-    {
+        EnsureConnected();
         string userID = e.userID;
         string displayName = e.displayName;
 
-        if (gameDataScript.CheckIfPlayerExists(userID))
+        if (!gameDataScript.CheckIfPlayerExists(userID))
         {
-            if (gameController.currentState == GameState.GameTime)
-            {
-                if (gameController.currentGameMode == GameMode.LongJump)
-                {
-                    jumpManager.CreateMarbleAndJump(e);
-                }
-                else if (gameController.currentGameMode == GameMode.HighJump)
-                {
-                    jumpManager.CreateMarbleAndHighJump(e);
-                }
-                else if (gameController.currentGameMode == GameMode.Race)
-                {
+            chatClient.SendMessage(chatJoinedChannel, $"@{displayName}{noPlayerEntryExists}");
+            return;
+        }
 
-                }
-            }
-            else
-            {
-                return;
-            }
-        }
-        else
+        if (gameController.currentState != GameState.GameTime)
         {
-            chatClient.SendMessage(chatJoinedChannel, displayName + noPlayerEntryExists);
+            chatClient.SendMessage(chatJoinedChannel, $"@{displayName}, sorry it's not gametime yet.");
+            return;
         }
+
+        switch (gameController.currentGameMode)
+        {
+            case GameMode.LongJump:
+                jumpManager.CreateMarbleAndJump(e);
+                break;
+            case GameMode.HighJump:
+                jumpManager.CreateMarbleAndHighJump(e);
+                break;
+            case GameMode.Race:
+                break;
+        }
+
     }
 
     //AcceptWhispers
@@ -394,15 +303,7 @@ public class Commands : MonoBehaviour
 
     public void Skins(Arrrgs e)
     {
-        if (chatClient == null)
-        {
-            Setup();
-        }
-        AttemptToSkins(e);
-    }
-
-    public void AttemptToSkins(Arrrgs e)
-    {
+        EnsureConnected();
         string userID = e.userID;
         string displayName = e.displayName;
 
@@ -418,11 +319,7 @@ public class Commands : MonoBehaviour
             chatClient.SendMessage(chatJoinedChannel, displayName + noPlayerEntryExists);
         }
     }
-    IEnumerator SkinsMessege(string skinsList)
-    {
-        yield return new WaitForSeconds(7);
-        chatClient.SendMessage(botJoinedChannel, skinsList);
-    }
+
     public void AkaiEasterEgg(string name)
     {
         chatClient.SendMessage(chatJoinedChannel, $"{name} is hacking!");
@@ -433,25 +330,13 @@ public class Commands : MonoBehaviour
         // if (e.userID == "73184979")
         if (e.isAdmin)
         {
-            FindObjectOfType<Shop>().ResetShop();
+            shop.ResetShop();
         }
     }
 
     public void Give(Arrrgs e)
     {
-        if (chatClient == null)
-        {
-            Setup();
-            AttemptToGive(e);
-        }
-        else
-        {
-            AttemptToGive(e);
-        }
-    }
-
-    public void AttemptToGive(Arrrgs e)
-    {
+        EnsureConnected();
         string userID = e.userID;
         string displayName = e.displayName;
 
@@ -508,5 +393,57 @@ public class Commands : MonoBehaviour
         gameDataScript.SubtractMoneyFromPlayerID(cost, userID);
         gameDataScript.AddMoneyToPlayerID(cost, PersonGettingMoney);
         chatClient.SendMessage(chatJoinedChannel, displayName+ " gave " + e.multiCommand[0] +" "+cost);
+    }
+
+    public void Price(Arrrgs e) {
+        EnsureConnected();
+        if (e.multiCommand.Count < 1) {
+            chatClient.SendMessage(chatJoinedChannel, $"@{e.displayName}, you need to specify a marble name.");
+            return;
+        }
+
+        var marble = marbleList.GetMarble(e.argumentsAsString);
+
+        if (marble == null) {
+            chatClient.SendMessage(chatJoinedChannel, $"@{e.displayName}, there is no marble with the name '{e.argumentsAsString}'.");
+            return;
+        }
+
+        chatClient.SendMessage(chatJoinedChannel, $"@{e.displayName}, the price of {marble.name} is ${marble.cost}.");
+    }
+
+    public void Store(Arrrgs e) {
+        EnsureConnected();
+        var marbleList = shop.MarblesInShop();
+        var marbleListString = marbleList.Select(m => $"{m.name}: ${m.cost}").Aggregate((o,n) => $"{o}, {n}");
+        chatClient.SendMessage(chatJoinedChannel, $"@{e.displayName}, the shop currently has these marbles: [{marbleListString}]");
+    }
+
+    public void SetPrice(Arrrgs e) {
+        EnsureConnected();
+        // Silently ignore non-admins
+        if (!e.isAdmin) { return; }
+        // Missing arguments
+        if (e.multiCommand.Count != 2) return;
+        // Check that the price is a valid number between 0 and 9999
+        if (!Int32.TryParse(e.multiCommand[1], out var price) || price < 0 || price > 9999) return;
+        var shopMarble = shop.MarblesInShop().FirstOrDefault(m => m.commonName.Equals(e.multiCommand[0]));
+        if (shopMarble != null) {
+            shopMarble.cost = price;
+            shop.ResetShop(false);
+        }
+        var marble = marbleList.GetMarble(e.multiCommand[0]);
+        if (marble != null) {
+            marble.cost = price;
+        }
+        // Check if the marble exists
+        if (!marbleList.DoesMarbleCommonNameExist(e.multiCommand[0])) return;
+        if (marbleList.SetMarbleCost(e.multiCommand[0], price) >= 0) {
+            chatClient.SendMessage(chatJoinedChannel, $"Marble {e.multiCommand[0]} changed price! It is now ${price}");
+        }
+    }
+
+    private void EnsureConnected() {
+        if (chatClient == null) Setup();
     }
 }
