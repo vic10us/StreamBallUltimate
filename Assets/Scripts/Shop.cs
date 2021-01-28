@@ -83,8 +83,8 @@ public class Shop : MonoBehaviour
         bool marbleInShop = false;
         foreach (var marble in shopMarbles)
         {
-            Debug.Log(marble.name);
-            Debug.Log(checkedMarble);
+            //Log(marble.name);
+            //Debug.Log(checkedMarble);
             if (marble.name.ToLower() == checkedMarble)
             {
                 marbleInShop = true;

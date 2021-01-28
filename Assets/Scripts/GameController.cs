@@ -30,7 +30,7 @@ public class GameController : MonoBehaviour
 
     private void UpdateGameStateText()
     {
-        Debug.Log(currentState);
+        // Debug.Log(currentState);
         switch (currentState)
         {
             case GameState.DownTime:
@@ -99,13 +99,13 @@ public class GameController : MonoBehaviour
 
     public string FindGameState()
     {
-        Debug.Log(currentGameMode);
+        //Debug.Log(currentGameMode);
         switch (currentGameMode)
         {
             case GameMode.LongJump:
                 return "Long Jump";
             case GameMode.HighJump:
-                Debug.Log("Launching High Jump");
+                //Debug.Log("Launching High Jump");
                 return "High Jump";
             case GameMode.Race:
                 return "Race";

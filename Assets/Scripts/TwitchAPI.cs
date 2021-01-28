@@ -34,7 +34,7 @@ public class TwitchAPI : MonoBehaviour
 
     private void GetChattersListCallBack(List<ChatterFormatted> listOfChatters)
     {
-        Debug.Log("List of " + listOfChatters.Count + "Viewers: ");
+        //Debug.Log("List of " + listOfChatters.Count + "Viewers: ");
         foreach (var chatterObject in listOfChatters)
         {
            // Debug.Log(chatterObject.Username);

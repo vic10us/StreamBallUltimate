@@ -62,7 +62,7 @@ public class Commands : MonoBehaviour
                 Queue = x.CommandInfo.Queue
             });
             commandHelp.Add(x.CommandInfo.Name, x.HelpInfo.HelpText);
-            Debug.LogWarning($"{x.CommandInfo.Name}: {x.HelpInfo.HelpText}");
+            //Debug.LogWarning($"{x.CommandInfo.Name}: {x.HelpInfo.HelpText}");
         }
     }
 
@@ -226,7 +226,6 @@ public class Commands : MonoBehaviour
 
         gameDataScript.SetPlayerEquipSkin(playerID, commonName);
         chatClient.SendMessage(chatJoinedChannel, $"{playerUserName}, you now have the {commonName} skin in use.");
-        Debug.Log(playerUserName + " equipt " + commonName);
     }
 
     //Equipted - checks if player data exists - checks what skin they have equipped - tells them what skin that is

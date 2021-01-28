@@ -22,8 +22,8 @@ public class CommandQueue : MonoBehaviour
     public void AddToChatQueue(Arrrgs arg)
     {
         commandQueueChat.Enqueue(arg);
-        Debug.Log("Command in queue");
-        Debug.Log("There are " + commandQueueChat.Count + " in the queue");
+        // Debug.Log("Command in queue");
+        // Debug.Log("There are " + commandQueueChat.Count + " in the queue");
     }
 
     private void AddToWhisperQueue(Arrrgs arg)

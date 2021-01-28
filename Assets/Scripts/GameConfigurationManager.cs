@@ -11,12 +11,9 @@ public class GameConfigurationManager: MonoBehaviour
     private string ConfigurationFile => Path.Combine(ConfigurationPath, ConfigurationFileName);
 
     private void Start() {
-        Debug.Log($"The persistentDataPath is: {ConfigurationPath}");
         if (File.Exists(ConfigurationFile)) {
-            Debug.Log("Config file found. [Loading]");
             _config = Configuration.LoadFromFile(ConfigurationFile);
         } else {
-            Debug.Log("Config file NOT found. [Creating]");
             _config = new Configuration();
             _config.SaveToFile(ConfigurationFile);
         }

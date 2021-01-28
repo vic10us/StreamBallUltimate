@@ -25,7 +25,7 @@ public class GameData : MonoBehaviour
 
     public bool CheckIfPlayerExists(string playerID)
     {
-        Debug.Log($"Checking if player with ID [{playerID}] exists in config");
+        //Debug.Log($"Checking if player with ID [{playerID}] exists in config");
         return gameData.ContainsKey(playerID);
     }
 
@@ -39,27 +39,27 @@ public class GameData : MonoBehaviour
         tempData.isSubscribed = false;
         gameData.Add(e.userID, tempData);
         SaveGameDataToTXT();
-        Debug.Log("GAME DATA SUCCESFULLY SAVED!!!!");
+        // Debug.Log("GAME DATA SUCCESFULLY SAVED!!!!");
     }
 
     public void AddMoneyToPlayerID(int money, string playerID)
     {
-        Debug.Log($"AddMoneyToPlayerID: {money} -> {playerID}");
+        //Debug.Log($"AddMoneyToPlayerID: {money} -> {playerID}");
         var userGameData = gameData[playerID];
         if (userGameData == null) return;
         gameData[playerID].money += money;
         SaveGameDataToTXT();
-        Debug.Log("GAME DATA SUCCESFULLY SAVED!!!!");
+        //Debug.Log("GAME DATA SUCCESFULLY SAVED!!!!");
     }
 
     public void SubtractMoneyFromPlayerID(int money, string playerID)
     {
-        Debug.Log($"SubtractMoneyFromPlayerID: {money} -> {playerID}");
+        //Debug.Log($"SubtractMoneyFromPlayerID: {money} -> {playerID}");
         var userGameData = gameData[playerID];
         if (userGameData == null) return;
         gameData[playerID].money -= money;
         SaveGameDataToTXT();
-        Debug.Log("GAME DATA SUCCESFULLY SAVED!!!!");
+        //Debug.Log("GAME DATA SUCCESFULLY SAVED!!!!");
     }
 
     public int CheckPlayerMoney(string playerID)
@@ -80,7 +80,7 @@ public class GameData : MonoBehaviour
         if (!playerData.purchasedSkins.Any(s => s.Equals(commonName, System.StringComparison.InvariantCultureIgnoreCase)))
             playerData.purchasedSkins.Add(commonName);
         SaveGameDataToTXT();
-        Debug.Log("GAME DATA SUCCESFULLY SAVED!!!!");
+        //Debug.Log("GAME DATA SUCCESFULLY SAVED!!!!");
     }
 
     public void SetPlayerEquipSkin(string playerID, string commonName)
@@ -88,7 +88,7 @@ public class GameData : MonoBehaviour
         var playerData = gameData[playerID];
         playerData.selectedSkin = commonName;
         SaveGameDataToTXT();
-        Debug.Log("GAME DATA SUCCESFULLY SAVED!!!!");
+        //Debug.Log("GAME DATA SUCCESFULLY SAVED!!!!");
     }
 
     public string GetPlayerEquipSkin(string playerID)
@@ -102,7 +102,7 @@ public class GameData : MonoBehaviour
     public void SaveGameDataToTXT()
     {
         dataManager.NewSave(gameData);
-        Debug.Log("GAME DATA SUCCESSFULLY SAVED!!!!");
+        //Debug.Log("GAME DATA SUCCESSFULLY SAVED!!!!");
     }
 
     public string CheckSkins(Arrrgs e)

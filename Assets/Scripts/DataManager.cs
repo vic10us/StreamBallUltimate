@@ -12,7 +12,7 @@ public class DataManager: MonoBehaviour
 
     public void Save()
     {
-        Debug.Log(data);
+        // Debug.Log(data);
         string json = JsonConvert.SerializeObject(data);
         //WriteToFile(file, json);
         System.IO.File.WriteAllText(GameDataFile, json);
@@ -28,7 +28,7 @@ public class DataManager: MonoBehaviour
     public void Backup(Dictionary<string, PlayerData> gameData)
     {
         //Code saves at this point to our text file 
-        Debug.Log(data);
+        // Debug.Log(data);
         string json = JsonConvert.SerializeObject(gameData, Formatting.Indented);
         System.IO.File.WriteAllText(GameDataFile, json);
     }

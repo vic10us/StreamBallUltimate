@@ -20,9 +20,9 @@ public static class ConfigurationManager {
     public static void SaveConfig(string filename, object o) {
         // var json = JsonUtility.ToJson(o);
         var json = JsonConvert.SerializeObject(o, Formatting.Indented);
-        Debug.LogWarning(json);
+        //Debug.LogWarning(json);
         if (File.Exists(filename)) File.Delete(filename);
-        Debug.LogWarning($"Saving config file: {filename}");
+        //Debug.LogWarning($"Saving config file: {filename}");
         File.WriteAllText(filename, json, System.Text.Encoding.UTF8);
     }
 

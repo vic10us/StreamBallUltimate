@@ -50,7 +50,7 @@ public class MarbleList : MonoBehaviour
         var marbleImageFileNames = marbleImageFiles.Select(mi => Path.GetFileName(mi));
         
         foreach (var info in marbleConfig.Marbles) {
-            Debug.Log($"Found marble in config. Loading... {info.FileName}");
+            //Debug.Log($"Found marble in config. Loading... {info.FileName}");
             var fileName = Path.Combine(path, info.FileName);
             if (!File.Exists(fileName)) continue;
             var newMarble = LoadNewMarble(info.CommonName, info.Rarity, fileName, info.Cost);
@@ -65,11 +65,11 @@ public class MarbleList : MonoBehaviour
             var fullFileName = Path.Combine(path, marbleImageFile);
             var name = Path.GetFileNameWithoutExtension(marbleImageFile);
             if (currentMarbles.ContainsKey(name)) {
-                Debug.Log($"{name} already exists in the marble list. Skipping");
+                //Debug.Log($"{name} already exists in the marble list. Skipping");
                 continue;
             }
             var rarity = UnityEngine.Random.Range(1, 5);
-            Debug.Log($"Adding {name} to the marble list [Rarity: {rarity}]");
+            //Debug.Log($"Adding {name} to the marble list [Rarity: {rarity}]");
             var newMarble = LoadNewMarble(name, rarity, fullFileName);
             var cost = newMarble.GetComponent<Marble>().cost;
             marbles.Add(newMarble);
@@ -85,7 +85,6 @@ public class MarbleList : MonoBehaviour
 
         if (marbleConfig.IsDirty) {
             marbleConfig.Marbles = marbleConfigMarbles;
-            // Debug.LogWarning($"{Path.Combine(path, "meta-data.json")}");
             ConfigurationManager.SaveConfig(Path.Combine(path, "meta-data.json"), marbleConfig);
         }
     }
@@ -105,16 +104,11 @@ public class MarbleList : MonoBehaviour
 
         LoadExternalMarbles();
 
-        // while (marbles.Count < 5) {
-        //     var newMarble = CreateDummyMarble(RandomString(8));
-        //     marbles.Add(newMarble);
-        // }
-
         foreach (var item in marbles)
         {
-            Debug.Log($"Iterating over marble : {item.GetInstanceID()}");
+            //Debug.Log($"Iterating over marble : {item.GetInstanceID()}");
             var marble = item.GetComponent<Marble>();
-            marble.transform.position = new Vector3(0,0,0);
+            marble.transform.position = new Vector3(0, 0, 0);
             if (marble.cost < 0) {
                 int cost = getMarbleCostsBasedOnRarity(marble.rarity);
                 marble.cost = cost;
@@ -157,7 +151,7 @@ public class MarbleList : MonoBehaviour
     public GameObject CreateDummyMarble(string commonName) {
         var item = Instantiate(MarblePrefab);
         item.transform.position = new Vector3(0,0,0);
-        Debug.Log($"Settting up new DUMMY marble : {item.GetInstanceID()}");
+        //Debug.Log($"Settting up new DUMMY marble : {item.GetInstanceID()}");
         var marble = item.GetComponent<Marble>();
         marble.transform.position = new Vector3(0,0,0);
         marble.commonName = commonName;
@@ -171,7 +165,7 @@ public class MarbleList : MonoBehaviour
     public GameObject LoadNewMarble(string commonName, int rarity, string imagePath, int cost = -1) {
         var item = Instantiate(MarblePrefab);
         item.transform.position = new Vector3(0,0,0);
-        Debug.Log($"Settting up new marble : {item.GetInstanceID()}");
+        //Debug.Log($"Settting up new marble : {item.GetInstanceID()}");
         var marble = item.GetComponent<Marble>();
         marble.transform.position = new Vector3(0,0,0);
         marble.commonName = commonName;
@@ -232,10 +226,6 @@ public class MarbleList : MonoBehaviour
             int marbleCode = UnityEngine.Random.Range(0, marbleLength);
             returnedMarbles.Add(marbles[marbleCode]);
         } while (returnedMarbles.Count < fetchCount);
-        foreach (var item in returnedMarbles)
-        {
-            Debug.Log(item.GetComponent<Marble>().commonName);
-        }
         return returnedMarbles;
     }
 
@@ -245,7 +235,7 @@ public class MarbleList : MonoBehaviour
     }
 
     public GameObject GetMarbleGameObject(string commonName) {
-        Debug.Log($"Looking for marble with the name of '{commonName}'");
+        //Debug.Log($"Looking for marble with the name of '{commonName}'");
         return marbles.FirstOrDefault(c => {
             var m = c.GetComponent<Marble>();
             return m.commonName.Equals(commonName, System.StringComparison.InvariantCultureIgnoreCase);

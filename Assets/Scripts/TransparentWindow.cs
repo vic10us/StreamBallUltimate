@@ -1,3 +1,5 @@
+#pragma warning disable 649
+
 //Note: Inspired by and uses some code found here: http://forum.unity3d.com/threads/windows-api-calls.127719/
 
 using UnityEngine;
@@ -71,9 +73,9 @@ public class TransparentWindow : MonoBehaviour
     void Start()
     {
         int fWidth = Screen.width;
-        Debug.LogWarning($"Width: {fWidth}");
+        //Debug.LogWarning($"Width: {fWidth}");
         int fHeight = Screen.height;
-        Debug.LogWarning($"Width: {fHeight}");
+        //Debug.LogWarning($"Width: {fHeight}");
 
 #if !UNITY_EDITOR   // You really don't want to enable this in the editor..
         

@@ -36,10 +36,10 @@ public static class GlobalConfiguration
     public static void LoadConfiguration()
     {
         if (File.Exists(ConfigurationFile)) {
-            Debug.Log("Config file found. [Loading]");
+            //Debug.Log("Config file found. [Loading]");
             _config = Configuration.LoadFromFile(ConfigurationFile);
         } else {
-            Debug.Log("Config file NOT found. [Creating]");
+            //Debug.Log("Config file NOT found. [Creating]");
             _config = new Configuration();
             _config.SaveToFile(ConfigurationFile);
         }

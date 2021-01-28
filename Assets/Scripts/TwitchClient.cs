@@ -32,7 +32,7 @@ public class TwitchClient : MonoBehaviour
         Application.runInBackground = true;
 
         //set up bot and tell what channel to join
-        Debug.Log($"{GlobalConfiguration.bot_name}: {GlobalConfiguration.bot_access_token}");
+        //Debug.Log($"{GlobalConfiguration.bot_name}: {GlobalConfiguration.bot_access_token}");
         bot_name = GlobalConfiguration.bot_name;
         channel_name = GlobalConfiguration.channel_name;
         ConnectionCredentials credentials = new ConnectionCredentials(GlobalConfiguration.bot_name, GlobalConfiguration.bot_access_token);
@@ -129,24 +129,21 @@ public class TwitchClient : MonoBehaviour
         {
             return whisper;
         }
-        else
-        {
 
-                whisper = whisper.Substring(1);
-                string[] commandArray = whisper.Split(new char[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
-                Debug.Log(commandArray[0]);
-                if (commandArray.Length > 1)
-                {
-                    for (int i = 1; i < commandArray.Length; i++)
-                    {
-                        commands += commandArray[i];
-                    }
-                }
-                commands = commands.ToLower();
-                return (commands);
-            
+        whisper = whisper.Substring(1);
+        string[] commandArray = whisper.Split(new char[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
+        // Debug.Log(commandArray[0]);
+        if (commandArray.Length > 1)
+        {
+            for (int i = 1; i < commandArray.Length; i++)
+            {
+                commands += commandArray[i];
+            }
         }
+        commands = commands.ToLower();
+        return (commands);
     }
+
     private List<string> ParseCommand(string command)
     {
         List<string> list = new List<string>();
@@ -155,11 +152,11 @@ public class TwitchClient : MonoBehaviour
         {
             return null;
         }
-        for (int i = 0; i < commandArray.Length; i++)
-        {
-            Debug.Log(commandArray.Length + " : this is command Array Length");
-            Debug.Log(commandArray[i] + " : this is command Array");
-        }
+        // for (int i = 0; i < commandArray.Length; i++)
+        // {
+        //     Debug.Log(commandArray.Length + " : this is command Array Length");
+        //     Debug.Log(commandArray[i] + " : this is command Array");
+        // }
         return null;
     }
 }

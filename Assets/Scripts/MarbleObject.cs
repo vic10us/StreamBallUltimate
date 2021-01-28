@@ -65,7 +65,7 @@ public class MarbleObject : MonoBehaviour
         }
         //Force acting on the marble
         float range = 4.8f + (((7.9f / 10000f) * percentage));
-        Debug.Log(range);
+        //Debug.Log(range);
         float distance = ((100f / 10000f) * percentage);
         jumpDistance = System.String.Format("{0:0.00}", distance);
         int score = Mathf.RoundToInt(distance);
@@ -107,7 +107,7 @@ public class MarbleObject : MonoBehaviour
             yield return new WaitForSeconds(0.5f);
         }
         while (speed > 0);
-        Debug.Log("MOVEMENTSTOPPED");
+        //Debug.Log("MOVEMENTSTOPPED");
         marbleText.TriggerAnimation();
         gameData.AddMoneyToPlayerID(money, ID);
         isrolling = false;
