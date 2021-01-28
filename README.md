@@ -4,7 +4,7 @@ _A game that is an overlay for twitch streams. It connects to the client and cha
 
 ## Game Settings and Configuration
 
-On first launch the application will generate an `global.cfg` file in the _Application.persistentDataPath_ folder.
+On first launch the application will generate a `global.cfg` file in the _Application.persistentDataPath_ folder.
 
 This is a standard INI file and it is used to configure the different aspects of the game.
 
