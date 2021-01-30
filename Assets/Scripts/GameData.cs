@@ -6,6 +6,7 @@
 // ReSharper disable UnusedMember.Local
 // ReSharper disable IteratorNeverReturns
 
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 using Newtonsoft.Json;
@@ -29,6 +30,23 @@ public class GameData : MonoBehaviour
             if (!kvp.Value.purchasedSkins.Any()) kvp.Value.purchasedSkins.Add("default");
         }
         dataManager.NewSave(gameData);
+    }
+
+    public void RenameAllPlayerSkins(string oldName, string newName)
+    {
+        var playersAffected = 
+            gameData
+                .Where(kvp => 
+                    kvp.Value.purchasedSkins.Any(sn => sn.Equals(oldName, StringComparison.InvariantCultureIgnoreCase)))
+                .ToDictionary(k => k.Key, k => k.Value);
+        if (!playersAffected.Any()) return;
+        foreach (var p in playersAffected.Select(keyValuePair => gameData[keyValuePair.Key]))
+        {
+            if (p.selectedSkin.Equals(oldName, StringComparison.InvariantCultureIgnoreCase))
+                p.selectedSkin = newName;
+            p.purchasedSkins = p.purchasedSkins.Select(s => s.Equals(oldName, StringComparison.InvariantCultureIgnoreCase) ? newName : s).ToList();
+        }
+        SaveGameDataToTXT();
     }
 
     public bool CheckIfPlayerExists(string playerID)
@@ -73,13 +91,13 @@ public class GameData : MonoBehaviour
     public bool IsSkinUnlocked(string playerId, string commonName) {
         return gameData[playerId]?
             .purchasedSkins
-            .Any(c => c.Equals(commonName, System.StringComparison.InvariantCultureIgnoreCase)) 
+            .Any(c => c.Equals(commonName, StringComparison.InvariantCultureIgnoreCase)) 
             ?? false;
     }
 
     public void UnlockSkinForPlayer(string playerID, string commonName) {
         var playerData = gameData[playerID];
-        if (!playerData.purchasedSkins.Any(s => s.Equals(commonName, System.StringComparison.InvariantCultureIgnoreCase)))
+        if (!playerData.purchasedSkins.Any(s => s.Equals(commonName, StringComparison.InvariantCultureIgnoreCase)))
             playerData.purchasedSkins.Add(commonName);
         SaveGameDataToTXT();
     }
@@ -112,7 +130,7 @@ public class GameData : MonoBehaviour
     
     public string ConvertCommonNameToUserID(string commonName)
     {
-        var e = gameData.FirstOrDefault(kvp => kvp.Value.playerName.Equals(commonName, System.StringComparison.InvariantCultureIgnoreCase));
+        var e = gameData.FirstOrDefault(kvp => kvp.Value.playerName.Equals(commonName, StringComparison.InvariantCultureIgnoreCase));
         return e.Key ?? "";
     }
     
@@ -121,4 +139,16 @@ public class GameData : MonoBehaviour
         return gameData[userID].playerName == name;
     }
 
+    internal string RemoveSkinFromPlayer(string playerID, string commonName)
+    {
+        var playerData = gameData[playerID];
+        var skin = playerData.purchasedSkins.FirstOrDefault(
+            s => s.Equals(commonName, StringComparison.InvariantCultureIgnoreCase));
+        if (string.IsNullOrWhiteSpace(skin)) return commonName;
+        playerData.purchasedSkins.Remove(skin);
+        if (playerData.selectedSkin.Equals(commonName, StringComparison.InvariantCultureIgnoreCase))
+            playerData.selectedSkin = playerData.purchasedSkins.FirstOrDefault() ?? "default";
+        SaveGameDataToTXT();
+        return playerData.selectedSkin;
+    }
 }

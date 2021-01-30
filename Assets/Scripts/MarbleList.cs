@@ -10,6 +10,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Text.RegularExpressions;
 using UnityEngine;
 
 public class MarbleList : MonoBehaviour
@@ -33,6 +34,26 @@ public class MarbleList : MonoBehaviour
         if (!marblesToUpdate.Any()) return -2;
         foreach (var marble in marblesToUpdate) {
             marble.Cost = newCost;
+        }
+        JsonConfigurationManager.SaveConfig(Path.Combine(path, "meta-data.json"), marbleConfig);
+        return 1;
+    }
+
+    public int SetMarbleName(string oldName, string newName)
+    {
+        if (!IsValidName(newName)) return -1;
+        var marbleConfig = GetMarbleConfig();
+        if (marbleConfig == null) return -1;
+        if (marbleConfig.Marbles.Any(m => m.CommonName.Equals(newName))) return -3;
+        var path = GlobalConfiguration.GetValue("marbles", "ExternalPath");
+        var marblesToUpdate =
+            marbleConfig.Marbles
+                .Where(m => m.CommonName.Equals(oldName, StringComparison.InvariantCultureIgnoreCase))
+                .ToList();
+        if (!marblesToUpdate.Any()) return -2;
+        foreach (var marble in marblesToUpdate)
+        {
+            marble.CommonName = newName;
         }
         JsonConfigurationManager.SaveConfig(Path.Combine(path, "meta-data.json"), marbleConfig);
         return 1;
@@ -240,5 +261,12 @@ public class MarbleList : MonoBehaviour
             var m = c.GetComponent<Marble>();
             return m.commonName.Equals(commonName, StringComparison.InvariantCultureIgnoreCase);
         });
+    }
+
+    internal bool IsValidName(string v)
+    {
+        if (string.IsNullOrWhiteSpace(v)) return false;
+        var r = new Regex("^[a-zA-Z0-9]*$");
+        return r.IsMatch(v);
     }
 }

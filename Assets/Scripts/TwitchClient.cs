@@ -78,13 +78,11 @@ public class TwitchClient : MonoBehaviour
             displayName = e.Command.ChatMessage.DisplayName,
             commandText = e.Command.CommandText,
             multiCommand = e.Command.ArgumentsAsList,
-            argumentsAsString = e.Command.ArgumentsAsString
+            argumentsAsString = e.Command.ArgumentsAsString,
         };
 
-        foreach (var t in e.Command.ArgumentsAsList)
-        {
-            chatArgs.commandArgs += t.ToLower();
-        }
+        if (e.Command.ArgumentsAsList.Any())
+            chatArgs.commandArgs = e.Command.ArgumentsAsList?.Aggregate((o, n) => $"{o}{n}");
 
         commandQueue.FirstCommandBuckets(chatArgs);
         debug.text = (e.Command.ChatMessage.Username);
