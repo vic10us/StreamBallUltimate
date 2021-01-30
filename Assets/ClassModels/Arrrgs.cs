@@ -1,15 +1,17 @@
-﻿using System.Collections.Generic;
+﻿#pragma warning disable 649
+#pragma warning disable IDE0051 // Remove unused private members
+// ReSharper disable CheckNamespace
+// ReSharper disable InconsistentNaming
+// ReSharper disable UnusedMember.Global
+// ReSharper disable UnusedMember.Local
+// ReSharper disable IteratorNeverReturns
 
-public enum MessageType {
-    Whisper,
-    Command,
-    Message
-}
+using System.Collections.Generic;
 
 public class Arrrgs
 {
     //These are the chat arguments that we care about 
-    //Stores data for both whispers and chat messeges 
+    //Stores data for both whispers and chat messages 
     public MessageType MessageType = MessageType.Command;
     public string message = string.Empty;
     public string userID = string.Empty;
@@ -20,5 +22,5 @@ public class Arrrgs
     public List<string> multiCommand;
     public bool isMod = false;
     public bool isBroadcaster = false;
-    public bool isAdmin => isMod || isBroadcaster;
+    public bool IsAdmin => isMod || isBroadcaster;
 }

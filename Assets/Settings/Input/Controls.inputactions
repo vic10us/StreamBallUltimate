@@ -1,0 +1,90 @@
+{
+    "name": "Controls",
+    "maps": [
+        {
+            "name": "Settings",
+            "id": "f0ab6d3b-bf36-4b2c-89c2-e111726a39b1",
+            "actions": [
+                {
+                    "name": "PlayGame",
+                    "type": "Button",
+                    "id": "bfa4d777-d28e-4b58-818a-574f3653a2c8",
+                    "expectedControlType": "Button",
+                    "processors": "",
+                    "interactions": ""
+                },
+                {
+                    "name": "StopGame",
+                    "type": "Button",
+                    "id": "8a570270-12a8-4e7f-98fc-5c0f7b1329d7",
+                    "expectedControlType": "Button",
+                    "processors": "",
+                    "interactions": ""
+                },
+                {
+                    "name": "ClearMarbles",
+                    "type": "Button",
+                    "id": "19b7bfcb-771e-4e00-8eda-9cf4c1d2454e",
+                    "expectedControlType": "Button",
+                    "processors": "",
+                    "interactions": ""
+                },
+                {
+                    "name": "ResetShop",
+                    "type": "Button",
+                    "id": "1b1273ec-c096-4af1-ad20-742d38b90384",
+                    "expectedControlType": "Button",
+                    "processors": "",
+                    "interactions": ""
+                }
+            ],
+            "bindings": [
+                {
+                    "name": "",
+                    "id": "eda552a4-4859-4ee6-a60b-ce6aa129831d",
+                    "path": "<Keyboard>/#(P)",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "PlayGame",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "dc796a3b-4e64-4626-9e14-3775baafe5b5",
+                    "path": "<Keyboard>/s",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "StopGame",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "00af6d70-c708-4dd0-8351-eee2cb952d3e",
+                    "path": "<Keyboard>/space",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "ClearMarbles",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "f069927c-ccf7-433e-8122-28600d812885",
+                    "path": "<Keyboard>/r",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "ResetShop",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                }
+            ]
+        }
+    ],
+    "controlSchemes": []
+}

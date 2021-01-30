@@ -1,4 +1,12 @@
-﻿using System.Collections.Generic;
+﻿#pragma warning disable 649
+#pragma warning disable IDE0051 // Remove unused private members
+// ReSharper disable CheckNamespace
+// ReSharper disable InconsistentNaming
+// ReSharper disable UnusedMember.Global
+// ReSharper disable UnusedMember.Local
+// ReSharper disable IteratorNeverReturns
+
+using System.Collections.Generic;
 using UnityEngine;
 using TwitchLib.Unity;
 using TwitchLib.Api.Models.Undocumented.Chatters;
@@ -7,21 +15,22 @@ public class TwitchAPI : MonoBehaviour
 {
 
     public Api api;
-    Client getClient;
-    TwitchClient twitchClient;
+    private readonly Client getClient;
+    private TwitchClient twitchClient;
+
     // Start is called before the first frame update
-    void Start()
+    private void Start()
     {
         Application.runInBackground = true;
         api = new Api();
         api.Settings.AccessToken = GlobalConfiguration.bot_access_token;
         api.Settings.ClientId = GlobalConfiguration.client_id;
-        GameObject client = GameObject.Find("Client");
+        var client = GameObject.Find("Client");
         twitchClient = client.GetComponent<TwitchClient>();
     }
 
     // Update is called once per frame
-    void Update()
+    private void Update()
     {
         /*
         if (Input.GetKeyDown(KeyCode.Alpha2))
@@ -35,9 +44,9 @@ public class TwitchAPI : MonoBehaviour
     private void GetChattersListCallBack(List<ChatterFormatted> listOfChatters)
     {
         //Debug.Log("List of " + listOfChatters.Count + "Viewers: ");
-        foreach (var chatterObject in listOfChatters)
-        {
-           // Debug.Log(chatterObject.Username);
-        }
+        // foreach (var chatterObject in listOfChatters)
+        // {
+        //    // Debug.Log(chatterObject.Username);
+        // }
     }
 }

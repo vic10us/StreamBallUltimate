@@ -1,4 +1,12 @@
-﻿using System.Collections.Generic;
+﻿#pragma warning disable 649
+#pragma warning disable IDE0051 // Remove unused private members
+// ReSharper disable CheckNamespace
+// ReSharper disable InconsistentNaming
+// ReSharper disable UnusedMember.Global
+// ReSharper disable UnusedMember.Local
+// ReSharper disable IteratorNeverReturns
+
+using System.Collections.Generic;
 
 public class PlayerData 
     //DATA that is stored in a dictionary and can be accessed by looking at the key which will be a player chat ID 
@@ -11,5 +19,4 @@ public class PlayerData
     //Things I may want to add later bellow
     //public Dictionary<int, bool> sfx = new Dictionary<int, bool>();
     //public Dictionary<int, bool> vfx = new Dictionary<int, bool>();
-
 }

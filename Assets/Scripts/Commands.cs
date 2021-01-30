@@ -1,4 +1,10 @@
 ﻿#pragma warning disable 649
+#pragma warning disable IDE0051 // Remove unused private members
+// ReSharper disable CheckNamespace
+// ReSharper disable InconsistentNaming
+// ReSharper disable UnusedMember.Global
+// ReSharper disable UnusedMember.Local
+// ReSharper disable IteratorNeverReturns
 
 using System.Collections.Generic;
 using UnityEngine;
@@ -7,44 +13,31 @@ using TwitchLib.Unity;
 using System;
 using System.Linq;
 using System.Text.RegularExpressions;
-
-public class HelpInfoAttribute : Attribute {
-    public string HelpText { get; set; } = "There is no help for this command";
-}
-
-public class CommandAttribute : Attribute {
-    public string Name { get; set; }
-    public string MatchExpression { get; set; }
-    public bool Queue { get; set; } = true;
-    public bool AdminOnly { get; set; } = false;
-}
+using StreamBallUltimate.Assets.Extensions;
 
 public class Commands : MonoBehaviour
 {
-    //ON THIS DAY WE GATHER TO PUT AN END TO THE WAR THAT HAS WAGED ON SIMPATHEYS BLOOD PRESSURE
+    //ON THIS DAY WE GATHER TO PUT AN END TO THE WAR THAT HAS WAGED ON SIMPATHEY'S BLOOD PRESSURE
     //RAVONUS, PHYRODARKMATTER, BEGINBOT AND PUNCHYPENGUIN WAGED WAR ALL THE WAY TO THE 200% HYPE TRAIN
-    //BUT IT DIDNT END THERE, THE BATTLE SPILLED OUT AND EFFECTED THE LIVES OF ALL BUG CLUB MEMBERS FOLLOWERS AND
-    //LURKERS ALIKE. ON THIS DAY AND HOUR THE TREATY IS SIGNED BY ALL PARTIES SO THAT SIMPATHEY DOESNT DIE
+    //BUT IT DIDN'T END THERE, THE BATTLE SPILLED OUT AND EFFECTED THE LIVES OF ALL BUG CLUB MEMBERS FOLLOWERS AND
+    //LURKERS ALIKE. ON THIS DAY AND HOUR THE TREATY IS SIGNED BY ALL PARTIES SO THAT SIMPATHEY DOESN'T DIE
     //BEGINBOT HAS SIGNED 
     //RAVONUS UNDECIDED 
     //PHYRODARKMATTER UNDECIDED 
     //PUNCHYPENGUIN HAS SIGNED
     //CODING CUBER HAS SIGNED 
     //MOTTZYMAKES 
-    TwitchClient twitchClient;
-    Client chatClient;
-    JoinedChannel chatJoinedChannel;
-    JoinedChannel botJoinedChannel;
-    [SerializeField] GameData gameDataScript;
-    [SerializeField] MarbleList marbleList;
-    [SerializeField] GameController gameController;
-    [SerializeField] JumpManager jumpManager;
-    [SerializeField] Shop shop;
-    const string help = "!join-join the game | !play-play the game when it is GAMETIME | play to earn money" +
-        " |  save money to buy and equip new marbles";
-    const string noPlayerEntryExists = ", Please type '!join' to play";
-    private Dictionary<Regex, CommandHandler> commandHandlers = new Dictionary<Regex, CommandHandler>();
-    private Dictionary<string, string> commandHelp = new Dictionary<string, string>(StringComparer.InvariantCultureIgnoreCase);
+    private TwitchClient twitchClient;
+    private Client chatClient;
+    private JoinedChannel chatJoinedChannel;
+    [SerializeField] public GameData gameDataScript;
+    [SerializeField] public MarbleList marbleList;
+    [SerializeField] public GameController gameController;
+    [SerializeField] public JumpManager jumpManager;
+    [SerializeField] public Shop shop;
+    private const string noPlayerEntryExists = ", Please type '!join' to play";
+    private readonly Dictionary<Regex, CommandHandler> _commandHandlers = new Dictionary<Regex, CommandHandler>();
+    private readonly Dictionary<string, string> _commandHelp = new Dictionary<string, string>(StringComparer.InvariantCultureIgnoreCase);
 
     private void SetupCommands() {
         var commandMethods = this.GetType().GetMethods().Where(m => m.GetCustomAttributes(typeof(CommandAttribute), false).Any());
@@ -53,26 +46,26 @@ public class Commands : MonoBehaviour
             CommandInfo = (CommandAttribute)m.GetCustomAttributes(typeof(CommandAttribute), false).First(),
             HelpInfo = (HelpInfoAttribute)m.GetCustomAttributes(typeof(HelpInfoAttribute), false).FirstOrDefault()
         }).ToList();
-        foreach (var x in commandResults) {
-            commandHandlers.Add(new Regex(x.CommandInfo.MatchExpression), 
+        foreach (var x in commandResults.Where(cr => cr.CommandInfo.Enabled)) {
+            _commandHandlers.Add(new Regex(x.CommandInfo.MatchExpression, RegexOptions.IgnoreCase),
             new CommandHandler {
                 Handle = a =>{
-                    x.Info.Invoke(this, new[] {a});
+                    x.Info.Invoke(this, new object[] {a});
                 },
                 Queue = x.CommandInfo.Queue
             });
-            commandHelp.Add(x.CommandInfo.Name, x.HelpInfo.HelpText);
-            //Debug.LogWarning($"{x.CommandInfo.Name}: {x.HelpInfo.HelpText}");
+            _commandHelp.Add(x.CommandInfo.Name, x.HelpInfo.HelpText);
         }
     }
 
+    // ReSharper disable once UnusedMember.Local
     private void Start()
     {
         SetupCommands();
     }
 
     public CommandHandler GetCommandHandler(string commandName) {
-        var command = commandHandlers.FirstOrDefault(k => k.Key.IsMatch(commandName));
+        var command = _commandHandlers.FirstOrDefault(k => k.Key.IsMatch(commandName));
         if (command.Value == null) Debug.LogWarning($"Command handler not found for: {commandName}");
         return command.Value;
     }
@@ -91,25 +84,35 @@ public class Commands : MonoBehaviour
         twitchClient = FindObjectOfType<TwitchClient>();
         chatClient = twitchClient.client;
         chatJoinedChannel = twitchClient.joinedChannel;
-        botJoinedChannel = twitchClient.botChannel;
     }
 
-    //Help - provids a list of commands
-    [HelpInfo(HelpText = "Use '!help [command]' for help with a command.")]
+    // [HelpInfo(HelpText = "Use `!bob` to find out who is your uncle!")]
+    // [Command(Name = "bob", MatchExpression = "^bob$", Enabled = true)]
+    // public void Bob(Arrrgs e)
+    // {
+    //     StartCoroutine(chatClient.SendMessages(chatJoinedChannel, "Bob's your uncle!"));
+    // }
+
+    //Help - provides a list of commands
+    [HelpInfo(HelpText = "Use `!help [command]` for help with a command. or `!help` alone for a list of commands.")]
     [Command(Name = "help", MatchExpression = "^help$")]
     public void Help(Arrrgs e)
     {
         EnsureConnected();
-        if (e.multiCommand.Any() && commandHelp.ContainsKey(e.multiCommand.First())) {
-            var helpText = commandHelp[e.multiCommand.First()];
-            chatClient.SendMessage(chatJoinedChannel, helpText);
+        if (e.multiCommand.Any() && _commandHelp.ContainsKey(e.multiCommand.First())) {
+            var helpText = _commandHelp[e.multiCommand.First()];
+            StartCoroutine(chatClient.SendMessages(chatJoinedChannel, helpText));
             return;
         }
-        chatClient.SendMessage(chatJoinedChannel, help);
+
+        var commands = _commandHelp.Select(c => $"!{c.Key}");
+        var helpMessage = $"Here are all the commands: [{commands.Aggregate((o,n) => $"{o}, {n}")}] Type !help [command] for more";
+
+        StartCoroutine(chatClient.SendMessages(chatJoinedChannel, helpMessage));
     }
 
     //Join - check if player data exists - if not create empty player data entry
-    [HelpInfo(HelpText = "Use '!join' to add yourself to the game")]
+    [HelpInfo(HelpText = "Use `!join` to add yourself to the game")]
     [Command(Name = "join", MatchExpression = "^join$")]
     public void Join (Arrrgs e)
     {
@@ -129,8 +132,8 @@ public class Commands : MonoBehaviour
     public void Money(Arrrgs e)
     {
         if (chatClient == null) Setup();
-        string playerID = e.userID;
-        string userName = e.displayName;
+        var playerID = e.userID;
+        var userName = e.displayName;
 
         if (!gameDataScript.CheckIfPlayerExists(playerID))
         {
@@ -147,8 +150,8 @@ public class Commands : MonoBehaviour
     public void Buy(Arrrgs e)
     {
         EnsureConnected();
-        string playerID = e.userID; //Command.ChatMessage.UserId;
-        string playerUserName = e.displayName; //Command.ChatMessage.Username;
+        var playerID = e.userID; //Command.ChatMessage.UserId;
+        var playerUserName = e.displayName; //Command.ChatMessage.Username;
         if (!gameDataScript.CheckIfPlayerExists(playerID))
         {
             chatClient.SendMessage(chatJoinedChannel, $"@{playerUserName}{noPlayerEntryExists}");
@@ -171,8 +174,8 @@ public class Commands : MonoBehaviour
             return;
         }
 
-        int playerMoney = gameDataScript.CheckPlayerMoney(playerID);
-        int marbleCost = marbleList.GetMarbleCostFromCommonName(commonName);
+        var playerMoney = gameDataScript.CheckPlayerMoney(playerID);
+        var marbleCost = marbleList.GetMarbleCostFromCommonName(commonName);
         if (gameDataScript.IsSkinUnlocked(playerID, commonName))
         {
             chatClient.SendMessage(chatJoinedChannel, $"@{playerUserName}, you already have the {commonName} marble unlocked.");
@@ -187,7 +190,7 @@ public class Commands : MonoBehaviour
 
         gameDataScript.SubtractMoneyFromPlayerID(marbleCost, playerID);
         gameDataScript.UnlockSkinForPlayer(playerID, commonName);
-        int currentMoney = gameDataScript.CheckPlayerMoney(playerID);
+        var currentMoney = gameDataScript.CheckPlayerMoney(playerID);
         var message =$"@{playerUserName} has unlocked the {commonName} marble. Use '!equip {commonName}' to use your new marble. Current Balance: ${currentMoney}";
         chatClient.SendMessage(chatJoinedChannel, message);
     }
@@ -220,7 +223,7 @@ public class Commands : MonoBehaviour
         // Check if the user owns that skin
         if (!gameDataScript.IsSkinUnlocked(playerID, commonName))
         {
-            chatClient.SendMessage(chatJoinedChannel, $"@{playerUserName}, you dont own that skin. Type !skins to see the skins you own.");
+            chatClient.SendMessage(chatJoinedChannel, $"@{playerUserName}, you don't own that skin. Type !skins to see the skins you own.");
             return;
         }
 
@@ -298,16 +301,16 @@ public class Commands : MonoBehaviour
         chatClient.SendMessage(chatJoinedChannel, skinsPlayerOwns);
     }
 
-    public void AkaiEasterEgg(string name)
+    public void AkaiEasterEgg(string playerName)
     {
-        chatClient.SendMessage(chatJoinedChannel, $"{name} is hacking!");
+        chatClient.SendMessage(chatJoinedChannel, $"{playerName} is hacking!");
     }
 
     [HelpInfo(HelpText = "[ADMIN ONLY] Use '!rotate' to randomize the shop items.")]
     [Command(Name = "rotate", MatchExpression = "^rotate$", Queue = false, AdminOnly = true)]
     public void Rotate(Arrrgs e)
     {
-        if (e.isAdmin)
+        if (e.IsAdmin)
         {
             shop.ResetShop();
         }
@@ -318,8 +321,8 @@ public class Commands : MonoBehaviour
     public void Give(Arrrgs e)
     {
         EnsureConnected();
-        string userID = e.userID;
-        string displayName = e.displayName;
+        var userID = e.userID;
+        var displayName = e.displayName;
 
         if (!gameDataScript.CheckIfPlayerExists(userID)) {
             // user not found... tell them to join
@@ -327,14 +330,14 @@ public class Commands : MonoBehaviour
             return;
         }
 
-        if (e.multiCommand?.Count < 2) {
-            // command is missin arguments show usage
+        if (e.multiCommand == null || e.multiCommand.Count < 2) {
+            // command is missing arguments show usage
             chatClient.SendMessage(chatJoinedChannel, $"@{displayName}, to give use !give [PlayerName] [Amount]");
             return;
         }
 
-        string otherPlayerDisplayName = e.multiCommand[0].TrimStart('@');
-        string PersonGettingMoney = gameDataScript.ConvertCommonNameToUserID(otherPlayerDisplayName);
+        var otherPlayerDisplayName = e.multiCommand?[0].TrimStart('@');
+        var PersonGettingMoney = gameDataScript.ConvertCommonNameToUserID(otherPlayerDisplayName);
 
         if (string.IsNullOrWhiteSpace(PersonGettingMoney) || !(gameDataScript.CheckIfPlayerExists(PersonGettingMoney) &&
         gameDataScript.CheckPlayerIDMatchesUserName(PersonGettingMoney, otherPlayerDisplayName))) {
@@ -343,22 +346,21 @@ public class Commands : MonoBehaviour
             return;
         }
 
-        int cost;
-        if (!int.TryParse(e.multiCommand[1], out cost)) {
-            chatClient.SendMessage(chatJoinedChannel, $"'{e.multiCommand[1]}' is not a valid money amount.");
+        if (!int.TryParse(e.multiCommand[1], out var cost)) {
+            chatClient.SendMessage(chatJoinedChannel, $"'{e.multiCommand?[1]}' is not a valid money amount.");
             return;
         }
 
-        if (e.isAdmin) {
+        if (e.IsAdmin) {
             gameDataScript.AddMoneyToPlayerID(cost, PersonGettingMoney);
             chatClient.SendMessage(chatJoinedChannel, $"@{displayName} granted {e.multiCommand[0]} ${cost}");
             return;
         }
 
-        int currentMoney = gameDataScript.CheckPlayerMoney(userID);
+        var currentMoney = gameDataScript.CheckPlayerMoney(userID);
         if (currentMoney < cost)
         {
-            chatClient.SendMessage(chatJoinedChannel, $"@{displayName}, you can't give money you dont have.");
+            chatClient.SendMessage(chatJoinedChannel, $"@{displayName}, you can't give money you don't have.");
         }
 
         if (cost <= 0 || cost>10000)
@@ -394,8 +396,8 @@ public class Commands : MonoBehaviour
     [Command(Name = "store", MatchExpression = "^store$")]
     public void Store(Arrrgs e) {
         EnsureConnected();
-        var marbleList = shop.MarblesInShop();
-        var marbleListString = marbleList.Select(m => $"{m.name}: ${m.cost}").Aggregate((o,n) => $"{o}, {n}");
+        var marbles = shop.MarblesInShop();
+        var marbleListString = marbles.Select(m => $"{m.name}: ${m.cost}").Aggregate((o,n) => $"{o}, {n}");
         chatClient.SendMessage(chatJoinedChannel, $"@{e.displayName}, the shop currently has these marbles: [{marbleListString}]");
     }
 
@@ -404,7 +406,7 @@ public class Commands : MonoBehaviour
     public void SetPrice(Arrrgs e) {
         EnsureConnected();
         // Silently ignore non-admins
-        if (!e.isAdmin) { return; }
+        if (!e.IsAdmin) { return; }
         // Missing arguments
         if (e.multiCommand.Count != 2) return;
         // Check that the price is a valid number between 0 and 9999
@@ -453,7 +455,7 @@ public class Commands : MonoBehaviour
         {
             Debug.Log("WHISPER,PLAYER DONE!");
             gameDataScript.SubscribePlayerToWhispers(userID);
-            chatClient.SendWhisper(playerName, "THIS IS A TEST MESSEGE FROM SIMPA GAME BOT.");
+            chatClient.SendWhisper(playerName, "THIS IS A TEST MESSAGE FROM SIMPA GAME BOT.");
         }
         else
         {

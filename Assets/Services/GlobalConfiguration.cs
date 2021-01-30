@@ -1,4 +1,12 @@
-﻿using System;
+﻿#pragma warning disable 649
+#pragma warning disable IDE0051 // Remove unused private members
+// ReSharper disable CheckNamespace
+// ReSharper disable InconsistentNaming
+// ReSharper disable UnusedMember.Global
+// ReSharper disable UnusedMember.Local
+// ReSharper disable IteratorNeverReturns
+
+using System;
 using System.IO;
 using SharpConfig;
 using UnityEngine;
@@ -21,7 +29,7 @@ public static class GlobalConfiguration
         return result; // _config[scope][key]?.StringValue ?? GetEnvironmentVariable(key);
     }
 
-    static string Or(this string value, string alternative) {
+    private static string Or(this string value, string alternative) {
         return string.IsNullOrWhiteSpace(value) ? alternative : value;
     }
 
@@ -36,10 +44,8 @@ public static class GlobalConfiguration
     public static void LoadConfiguration()
     {
         if (File.Exists(ConfigurationFile)) {
-            //Debug.Log("Config file found. [Loading]");
             _config = Configuration.LoadFromFile(ConfigurationFile);
         } else {
-            //Debug.Log("Config file NOT found. [Creating]");
             _config = new Configuration();
             _config.SaveToFile(ConfigurationFile);
         }
@@ -50,27 +56,5 @@ public static class GlobalConfiguration
         bot_access_token = GetValue("twitch", "bot_access_token");
         bot_refresh_token = GetValue("twitch", "bot_refresh_token");
         channel_name = GetValue("twitch", "channel_name");
-
-        /*
-        string value;
-        bool toDelete = false;
-
-        // Check whether the environment variable exists.
-        value = Environment.GetEnvironmentVariable("client_id");
-        // If necessary, create it.
-        if (value == null)
-        {
-            Environment.SetEnvironmentVariable("client_id", "");
-            Environment.SetEnvironmentVariable("client_secret", "");
-            Environment.SetEnvironmentVariable("bot_access_token", "");
-            Environment.SetEnvironmentVariable("bot_refresh_token", "");
-            toDelete = true;
-
-            // Now retrieve it.
-            client_id = Environment.GetEnvironmentVariable("client_id");
-            client_secret = Environment.GetEnvironmentVariable("client_secret");
-            bot_access_token = Environment.GetEnvironmentVariable("bot_access_token");
-            bot_refresh_token = Environment.GetEnvironmentVariable("bot_refresh_token");
-   */
     }
 }

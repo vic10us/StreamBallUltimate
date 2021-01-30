@@ -1,4 +1,10 @@
 ﻿#pragma warning disable 649
+#pragma warning disable IDE0051 // Remove unused private members
+// ReSharper disable CheckNamespace
+// ReSharper disable InconsistentNaming
+// ReSharper disable UnusedMember.Global
+// ReSharper disable UnusedMember.Local
+// ReSharper disable IteratorNeverReturns
 
 using UnityEngine;
 using TMPro;
@@ -6,14 +12,12 @@ using System;
 
 public class Timer : MonoBehaviour
 {
+    [SerializeField] public float timeBetweenGames = 600;
+    [SerializeField] public float timeOfGame = 90;
+    [SerializeField] public GameController gameController;
     public float timeRemaining = 65;
-    public bool timerIsRunning = false;
+    public bool timerIsRunning;
     public TextMeshPro timeText;
-    
-    [SerializeField] float timeBetweenGames = 600;
-    [SerializeField] float timeOfGame = 90;
-    [SerializeField] GameController gameController;
-
     public bool wasGameTime;
     
     void Start()
@@ -24,27 +28,25 @@ public class Timer : MonoBehaviour
 
     void Update()
     {
-        if (timerIsRunning)
+        if (!timerIsRunning) return;
+        if (timeRemaining > 0)
         {
-            if (timeRemaining > 0)
+            timeRemaining -= Time.deltaTime;
+            DisplayTime(timeRemaining);
+        }
+        else
+        {
+            timerIsRunning = false;
+            timeRemaining = 0;
+            if (wasGameTime)
             {
-                timeRemaining -= Time.deltaTime;
-                DisplayTime(timeRemaining);
+                gameController.TriggerCutscene();
+                wasGameTime = false;
             }
             else
             {
-                timerIsRunning = false;
-                timeRemaining = 0;
-                if (wasGameTime)
-                {
-                    gameController.TriggerCutscene();
-                    wasGameTime = false;
-                }
-                else
-                {
-                    gameController.TriggerDowntime();
-                    wasGameTime = true;
-                }
+                gameController.TriggerDowntime();
+                wasGameTime = true;
             }
         }
     }

@@ -1,4 +1,10 @@
 ﻿#pragma warning disable 649
+#pragma warning disable IDE0051 // Remove unused private members
+// ReSharper disable CheckNamespace
+// ReSharper disable InconsistentNaming
+// ReSharper disable UnusedMember.Global
+// ReSharper disable UnusedMember.Local
+// ReSharper disable IteratorNeverReturns
 
 using System;
 using System.Collections.Generic;
@@ -8,26 +14,27 @@ using UnityEngine;
 
 public class MarbleList : MonoBehaviour
 {
-    [SerializeField] int minCommon = 0;
-    [SerializeField] int maxCommon = 100;
-    [SerializeField] int maxRare = 400;
-    [SerializeField] int maxEpic = 1000;
-    [SerializeField] int maxLegendary = 2000;
-    [SerializeField] GameObject MarblePrefab;
-    // [SerializeField] string ExternalMarblesPath = @"D:\Media\CustomMarbles";
-    [SerializeField] List<GameObject> marbles;
+    [SerializeField] public int minCommon = 0;
+    [SerializeField] public int maxCommon = 100;
+    [SerializeField] public int maxRare = 400;
+    [SerializeField] public int maxEpic = 1000;
+    [SerializeField] public int maxLegendary = 2000;
+    [SerializeField] public GameObject MarblePrefab;
+    [SerializeField] public List<GameObject> marbles;
 
     public int SetMarbleCost(string commonName, int newCost) {
-        
         var marbleConfig = GetMarbleConfig();
         if (marbleConfig == null) return -1;
         var path = GlobalConfiguration.GetValue("marbles", "ExternalPath");
-        var marblesToUpdate = marbleConfig.Marbles.Where(m => m.CommonName.Equals(commonName, StringComparison.InvariantCultureIgnoreCase));
+        var marblesToUpdate = 
+            marbleConfig.Marbles
+                .Where(m => m.CommonName.Equals(commonName, StringComparison.InvariantCultureIgnoreCase))
+                .ToList();
         if (!marblesToUpdate.Any()) return -2;
         foreach (var marble in marblesToUpdate) {
             marble.Cost = newCost;
         }
-        ConfigurationManager.SaveConfig(Path.Combine(path, "meta-data.json"), marbleConfig);
+        JsonConfigurationManager.SaveConfig(Path.Combine(path, "meta-data.json"), marbleConfig);
         return 1;
     }
 
@@ -35,7 +42,7 @@ public class MarbleList : MonoBehaviour
         var loadMarbles = GlobalConfiguration.GetValue("marbles", "LoadExternalMarbles").Equals("true", StringComparison.InvariantCultureIgnoreCase);
         var path = GlobalConfiguration.GetValue("marbles", "ExternalPath");
         if (!loadMarbles || string.IsNullOrWhiteSpace(path)) return null;
-        var marbleConfig = ConfigurationManager.GetConfig<MarbleInfos>(Path.Combine(path, "meta-data.json"), true);
+        var marbleConfig = JsonConfigurationManager.GetConfig<MarbleInfos>(Path.Combine(path, "meta-data.json"), true);
         return marbleConfig;
     }
 
@@ -47,7 +54,7 @@ public class MarbleList : MonoBehaviour
         var marbleConfigMarbles = marbleConfig.Marbles.ToList();
         var currentMarbles = marbles.ToDictionary(m => m.name, m => m);
         var marbleImageFiles = Directory.GetFiles(path, "*.png");
-        var marbleImageFileNames = marbleImageFiles.Select(mi => Path.GetFileName(mi));
+        var marbleImageFileNames = marbleImageFiles.Select(Path.GetFileName);
         
         foreach (var info in marbleConfig.Marbles) {
             //Debug.Log($"Found marble in config. Loading... {info.FileName}");
@@ -63,19 +70,18 @@ public class MarbleList : MonoBehaviour
                         .Where(min => !marbleConfig.Marbles.Any(fn => fn.FileName.Equals(min, StringComparison.InvariantCultureIgnoreCase)))) 
         {
             var fullFileName = Path.Combine(path, marbleImageFile);
-            var name = Path.GetFileNameWithoutExtension(marbleImageFile);
-            if (currentMarbles.ContainsKey(name)) {
-                //Debug.Log($"{name} already exists in the marble list. Skipping");
+            var fileNameWithoutExtension = Path.GetFileNameWithoutExtension(marbleImageFile);
+            if (currentMarbles.ContainsKey(fileNameWithoutExtension)) {
                 continue;
             }
+
             var rarity = UnityEngine.Random.Range(1, 5);
-            //Debug.Log($"Adding {name} to the marble list [Rarity: {rarity}]");
-            var newMarble = LoadNewMarble(name, rarity, fullFileName);
+            var newMarble = LoadNewMarble(fileNameWithoutExtension, rarity, fullFileName);
             var cost = newMarble.GetComponent<Marble>().cost;
             marbles.Add(newMarble);
-            currentMarbles.Add(name, newMarble);
+            currentMarbles.Add(fileNameWithoutExtension, newMarble);
             marbleConfigMarbles.Add(new MarbleInfo {
-                CommonName = name,
+                CommonName = fileNameWithoutExtension,
                 Cost = cost,
                 FileName = marbleImageFile,
                 Rarity = rarity
@@ -83,13 +89,14 @@ public class MarbleList : MonoBehaviour
             marbleConfig.IsDirty = true;
         }
 
-        if (marbleConfig.IsDirty) {
-            marbleConfig.Marbles = marbleConfigMarbles;
-            ConfigurationManager.SaveConfig(Path.Combine(path, "meta-data.json"), marbleConfig);
-        }
+        if (!marbleConfig.IsDirty) return;
+
+        marbleConfig.Marbles = marbleConfigMarbles;
+        JsonConfigurationManager.SaveConfig(Path.Combine(path, "meta-data.json"), marbleConfig);
     }
 
-    private static System.Random random = new System.Random();
+    private static readonly System.Random random = new System.Random();
+
     public static string RandomString(int length)
     {
         const string chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
@@ -104,24 +111,21 @@ public class MarbleList : MonoBehaviour
 
         LoadExternalMarbles();
 
-        foreach (var item in marbles)
+        foreach (var marble in marbles.Select(item => item.GetComponent<Marble>()))
         {
-            //Debug.Log($"Iterating over marble : {item.GetInstanceID()}");
-            var marble = item.GetComponent<Marble>();
             marble.transform.position = new Vector3(0, 0, 0);
-            if (marble.cost < 0) {
-                int cost = getMarbleCostsBasedOnRarity(marble.rarity);
-                marble.cost = cost;
-            }
+            if (marble.cost >= 0) continue;
+            var cost = getMarbleCostsBasedOnRarity(marble.rarity);
+            marble.cost = cost;
         }
     }
 
     public static Texture2D Resize(Texture2D texture2D,int targetX,int targetY)
     {
-        RenderTexture rt=new RenderTexture(targetX, targetY,24);
+        var rt=new RenderTexture(targetX, targetY,24);
         RenderTexture.active = rt;
         Graphics.Blit(texture2D,rt);
-        Texture2D result=new Texture2D(targetX,targetY);
+        var result=new Texture2D(targetX,targetY);
         result.ReadPixels(new Rect(0,0,targetX,targetY),0,0);
         result.Apply();
         return result;
@@ -130,10 +134,9 @@ public class MarbleList : MonoBehaviour
     public static Texture2D LoadMarblePNG(string filePath) {
     
         Texture2D tex = null;
-        byte[] fileData;
-    
+
         if (File.Exists(filePath)) {
-            fileData = File.ReadAllBytes(filePath);
+            var fileData = File.ReadAllBytes(filePath);
             tex = new Texture2D(512, 512);
             tex.LoadImage(fileData); //..this will auto-resize the texture dimensions.
         }
@@ -142,8 +145,8 @@ public class MarbleList : MonoBehaviour
     }
     
     public Sprite AddSprite(string filePath) {
-        Texture2D _texture = LoadMarblePNG(filePath); // Resources.Load<Texture2D>("texture2") as Texture2D;
-        Sprite newSprite = Sprite.Create(_texture, new Rect(0f, 0f, _texture.width, _texture.height), new Vector2(0.5f, 0.5f), 100f);
+        var _texture = LoadMarblePNG(filePath); // Resources.Load<Texture2D>("texture2") as Texture2D;
+        var newSprite = Sprite.Create(_texture, new Rect(0f, 0f, _texture.width, _texture.height), new Vector2(0.5f, 0.5f), 100f);
         newSprite.name = Path.GetFileNameWithoutExtension(filePath);
         return newSprite;
     }
@@ -151,7 +154,6 @@ public class MarbleList : MonoBehaviour
     public GameObject CreateDummyMarble(string commonName) {
         var item = Instantiate(MarblePrefab);
         item.transform.position = new Vector3(0,0,0);
-        //Debug.Log($"Settting up new DUMMY marble : {item.GetInstanceID()}");
         var marble = item.GetComponent<Marble>();
         marble.transform.position = new Vector3(0,0,0);
         marble.commonName = commonName;
@@ -165,7 +167,6 @@ public class MarbleList : MonoBehaviour
     public GameObject LoadNewMarble(string commonName, int rarity, string imagePath, int cost = -1) {
         var item = Instantiate(MarblePrefab);
         item.transform.position = new Vector3(0,0,0);
-        //Debug.Log($"Settting up new marble : {item.GetInstanceID()}");
         var marble = item.GetComponent<Marble>();
         marble.transform.position = new Vector3(0,0,0);
         marble.commonName = commonName;
@@ -213,17 +214,17 @@ public class MarbleList : MonoBehaviour
 
     public HashSet<GameObject> GetMarblesForShop(int howManyMarbles)
     {
-        HashSet<GameObject> returnedMarbles = new HashSet<GameObject>();
+        var returnedMarbles = new HashSet<GameObject>();
         if (!marbles.Any()) {
             Debug.LogError("There are NO marbles to load into the shop. :(");
             return returnedMarbles;
         }
 
-        int marbleLength = marbles.Count;
+        var marbleLength = marbles.Count;
         var fetchCount = Math.Min(howManyMarbles, marbles.Count);
 
         do {
-            int marbleCode = UnityEngine.Random.Range(0, marbleLength);
+            var marbleCode = UnityEngine.Random.Range(0, marbleLength);
             returnedMarbles.Add(marbles[marbleCode]);
         } while (returnedMarbles.Count < fetchCount);
         return returnedMarbles;
@@ -235,10 +236,9 @@ public class MarbleList : MonoBehaviour
     }
 
     public GameObject GetMarbleGameObject(string commonName) {
-        //Debug.Log($"Looking for marble with the name of '{commonName}'");
         return marbles.FirstOrDefault(c => {
             var m = c.GetComponent<Marble>();
-            return m.commonName.Equals(commonName, System.StringComparison.InvariantCultureIgnoreCase);
+            return m.commonName.Equals(commonName, StringComparison.InvariantCultureIgnoreCase);
         });
     }
 }

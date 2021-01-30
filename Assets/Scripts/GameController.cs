@@ -1,30 +1,69 @@
 ﻿#pragma warning disable 649
+#pragma warning disable IDE0051 // Remove unused private members
+// ReSharper disable CheckNamespace
+// ReSharper disable InconsistentNaming
+// ReSharper disable UnusedMember.Global
+// ReSharper disable UnusedMember.Local
+// ReSharper disable IteratorNeverReturns
 
-using UnityEngine;
 using TMPro;
+using UnityEngine;
+using UnityEngine.InputSystem;
 
-public enum GameState { DownTime, CutScene, GameTime };
-public enum GameMode { LongJump, HighJump, Race };
 public class GameController : MonoBehaviour
 {
-    public DataManager dataManager;
+    [SerializeField] public TextMeshPro _gameStateText;
+    [SerializeField] public Null _nullCharacter;
+    [SerializeField] public Timer _timer;
+    [SerializeField] public Shop _shop;
+
     public GameState currentState;
     public GameMode currentGameMode;
-    [SerializeField] TextMeshPro gameStateText;
-    JumpManager jumpManager;
+    private JumpManager _jumpManager;
     public Shop gameShop;
-    [SerializeField] Null nullCharacter;
-    [SerializeField] Timer timer;
-    [SerializeField] Shop shop;
+    private Controls controls;
 
-    //The game has states Downtime, Cutscene, Gametime
-    //Gametime can link to different game modes longJump, highJump, race 
+    private void Awake()
+    {
+        controls = new Controls();
+    }
+
+    private void OnEnable() {
+        controls.Settings.PlayGame.performed += OnPlayGame;
+        controls.Settings.ClearMarbles.performed += OnClearMarbles;
+        controls.Settings.StopGame.performed += OnStopGame;
+        controls.Settings.Enable();
+    }
+
+    private void OnDisable()
+    {
+        controls.Settings.Disable();
+        controls.Settings.PlayGame.performed -= OnPlayGame;
+        controls.Settings.ClearMarbles.performed -= OnClearMarbles;
+        controls.Settings.StopGame.performed -= OnStopGame;
+    }
+
+    private void OnStopGame(InputAction.CallbackContext obj)
+    {
+        DowntimeNow();
+    }
+
+    private void OnClearMarbles(InputAction.CallbackContext context)
+    {
+        StartCoroutine(_jumpManager.DestroyMarbles());
+    }
+    
+    private void OnPlayGame(InputAction.CallbackContext context)
+    {
+        Debug.Log("Play Game Called");
+        PlayNow();
+    }
 
     void Start()
     {
         currentGameMode = GameMode.LongJump;
         currentState = GameState.DownTime;
-        jumpManager = FindObjectOfType<JumpManager>();
+        _jumpManager = FindObjectOfType<JumpManager>();
         UpdateGameStateText();
     }
 
@@ -34,40 +73,27 @@ public class GameController : MonoBehaviour
         switch (currentState)
         {
             case GameState.DownTime:
-                gameStateText.text = "Down Time";
+                _gameStateText.text = "Down Time";
                 break;
             case GameState.CutScene:
-                gameStateText.text = "Cut Scene";
+                _gameStateText.text = "Cut Scene";
                 break;
             case GameState.GameTime:
-                gameStateText.text = "Game Time";
+                _gameStateText.text = "Game Time";
                 break;
             default:
+                _gameStateText.text = _gameStateText.text;
                 break;
-        }
-    }
-
-    void Update()
-    {
-        if (Input.GetKeyDown("space"))
-        {
-            StartCoroutine(jumpManager.DestroyMarbles());
-        }
-        if (Input.GetKeyDown(KeyCode.P)) {
-            PlayNow();
-        }
-        if (Input.GetKeyDown(KeyCode.S)) {
-            DowntimeNow();
         }
     }
 
     public void PlayNow() {
-        timer.wasGameTime = false;
+        _timer.wasGameTime = false;
         TriggerCutscene(0);
     }
 
     public void DowntimeNow() {
-        timer.wasGameTime = true;
+        _timer.wasGameTime = true;
         TriggerDowntime();
     }
 
@@ -75,7 +101,7 @@ public class GameController : MonoBehaviour
     {
         currentState = GameState.CutScene;
         gameShop.gameObject.SetActive(false);
-        nullCharacter.NullStartCutScene(wait);
+        _nullCharacter.NullStartCutScene(wait);
         UpdateGameStateText();
     }
 
@@ -83,29 +109,27 @@ public class GameController : MonoBehaviour
     {
         currentState = GameState.GameTime;
         UpdateGameStateText();
-        timer.ResetGameTimer();
+        _timer.ResetGameTimer();
     }
 
     public void TriggerDowntime()
     {
-        shop.ResetShop();
+        _shop.ResetShop();
         currentState = GameState.DownTime;
         UpdateGameStateText();
-        timer.ResetDowntimeTimer();
-        StartCoroutine(jumpManager.DestroyMarbles());
-        nullCharacter.HideCharacter();
+        _timer.ResetDowntimeTimer();
+        StartCoroutine(_jumpManager.DestroyMarbles());
+        _nullCharacter.HideCharacter();
         gameShop.gameObject.SetActive(true);
     }
 
     public string FindGameState()
     {
-        //Debug.Log(currentGameMode);
         switch (currentGameMode)
         {
             case GameMode.LongJump:
                 return "Long Jump";
             case GameMode.HighJump:
-                //Debug.Log("Launching High Jump");
                 return "High Jump";
             case GameMode.Race:
                 return "Race";
