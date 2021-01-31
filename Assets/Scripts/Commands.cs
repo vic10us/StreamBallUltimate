@@ -315,9 +315,7 @@ public class Commands : MonoBehaviour
     [Command(Name = "gametime", MatchExpression = "^gametime", Queue = false, AdminOnly = true)]
     public void GameTime(Arrrgs e)
     {
-        EnsureConnected();
-        if (!e.IsAdmin) return;
-        // if (gameController.currentState != GameState.GameTime) return;
+        if (!e.IsAdmin || gameController.currentState == GameState.GameTime) return;
         gameController.PlayNow();
     }
 
@@ -325,9 +323,7 @@ public class Commands : MonoBehaviour
     [Command(Name = "stopgame", MatchExpression = "^stopgame", Queue = false, AdminOnly = true)]
     public void StopGame(Arrrgs e)
     {
-        EnsureConnected();
-        if (!e.IsAdmin) return;
-        // if (gameController.currentState == GameState.GameTime) return;
+        if (!e.IsAdmin || gameController.currentState != GameState.GameTime) return;
         gameController.DowntimeNow();
     }
 
