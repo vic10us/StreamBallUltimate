@@ -71,9 +71,9 @@ public class Commands : MonoBehaviour
     }
 
     public void ExecuteCommand(Arrrgs a) {
-        var command = GetCommandHandler(a.commandText);
+        var command = GetCommandHandler(a.CommandText);
         if (command == null) {
-            Debug.LogWarning($"Command handler not found for: {a.commandText}");
+            Debug.LogWarning($"Command handler not found for: {a.CommandText}");
             return;
         }
         command.Handle(a);
@@ -99,8 +99,8 @@ public class Commands : MonoBehaviour
     public void Help(Arrrgs e)
     {
         EnsureConnected();
-        if (e.multiCommand.Any() && _commandHelp.ContainsKey(e.multiCommand.First())) {
-            var helpText = _commandHelp[e.multiCommand.First()];
+        if (e.MultiCommand.Any() && _commandHelp.ContainsKey(e.MultiCommand.First())) {
+            var helpText = _commandHelp[e.MultiCommand.First()];
             StartCoroutine(chatClient.SendMessages(chatJoinedChannel, helpText));
             return;
         }
@@ -117,13 +117,13 @@ public class Commands : MonoBehaviour
     public void Join (Arrrgs e)
     {
         EnsureConnected();
-        if (gameDataScript.CheckIfPlayerExists(e.userID))
+        if (gameDataScript.CheckIfPlayerExists(e.UserID))
         {
-            chatClient.SendMessage(chatJoinedChannel, $"@{e.displayName} your user entry already exists, no need to join again.");
+            chatClient.SendMessage(chatJoinedChannel, $"@{e.DisplayName} your user entry already exists, no need to join again.");
             return;
         }
         gameDataScript.CreateNewPlayerEntry(e);
-        chatClient.SendMessage(chatJoinedChannel, $"@{e.displayName} you have joined the game. Enjoy!");
+        chatClient.SendMessage(chatJoinedChannel, $"@{e.DisplayName} you have joined the game. Enjoy!");
     }
 
     [HelpInfo(HelpText = "Use '!money' to query how much money you have in the bank.")]
@@ -132,8 +132,8 @@ public class Commands : MonoBehaviour
     public void Money(Arrrgs e)
     {
         if (chatClient == null) Setup();
-        var playerID = e.userID;
-        var userName = e.displayName;
+        var playerID = e.UserID;
+        var userName = e.DisplayName;
 
         if (!gameDataScript.CheckIfPlayerExists(playerID))
         {
@@ -149,8 +149,8 @@ public class Commands : MonoBehaviour
     public void Bob(Arrrgs e)
     {
         EnsureConnected();
-        var playerID = e.userID;
-        var playerUserName = e.displayName;
+        var playerID = e.UserID;
+        var playerUserName = e.DisplayName;
 
         if (!gameDataScript.CheckIfPlayerExists(playerID))
         {
@@ -158,7 +158,7 @@ public class Commands : MonoBehaviour
             return;
         }
 
-        var commonName = e.commandArgs;
+        var commonName = e.CommandArgs;
 
         if (commonName.Equals("default", StringComparison.InvariantCultureIgnoreCase))
         {
@@ -201,15 +201,15 @@ public class Commands : MonoBehaviour
     public void Buy(Arrrgs e)
     {
         EnsureConnected();
-        var playerID = e.userID; //Command.ChatMessage.UserId;
-        var playerUserName = e.displayName; //Command.ChatMessage.Username;
+        var playerID = e.UserID; //Command.ChatMessage.UserId;
+        var playerUserName = e.DisplayName; //Command.ChatMessage.Username;
         if (!gameDataScript.CheckIfPlayerExists(playerID))
         {
             chatClient.SendMessage(chatJoinedChannel, $"@{playerUserName}{noPlayerEntryExists}");
             return;
         }
 
-        var commonName = e.commandArgs;
+        var commonName = e.CommandArgs;
 
         // Check if the marble with that name exists in the Marble List
         if (!marbleList.DoesMarbleCommonNameExist(commonName))
@@ -253,9 +253,9 @@ public class Commands : MonoBehaviour
     public void Equip(Arrrgs e)
     {
         EnsureConnected();
-        var playerID = e.userID;
-        var playerUserName = e.displayName;
-        var commonName = e.commandArgs;
+        var playerID = e.UserID;
+        var playerUserName = e.DisplayName;
+        var commonName = e.CommandArgs;
 
         // Check if the player has joined
         if (!gameDataScript.CheckIfPlayerExists(playerID))
@@ -297,8 +297,8 @@ public class Commands : MonoBehaviour
     public void InUse(Arrrgs e)
     {
         EnsureConnected();
-        var playerID = e.userID;
-        var playerUserName = e.displayName;
+        var playerID = e.UserID;
+        var playerUserName = e.DisplayName;
 
         if (!gameDataScript.CheckIfPlayerExists(playerID))
         {
@@ -315,8 +315,8 @@ public class Commands : MonoBehaviour
     public void Play(Arrrgs e)
     {
         EnsureConnected();
-        var userID = e.userID;
-        var displayName = e.displayName;
+        var userID = e.UserID;
+        var displayName = e.DisplayName;
 
         if (!gameDataScript.CheckIfPlayerExists(userID))
         {
@@ -349,8 +349,8 @@ public class Commands : MonoBehaviour
     public void Skins(Arrrgs e)
     {
         EnsureConnected();
-        var userID = e.userID;
-        var displayName = e.displayName;
+        var userID = e.UserID;
+        var displayName = e.DisplayName;
 
         if (!gameDataScript.CheckIfPlayerExists(userID))
         {
@@ -381,8 +381,8 @@ public class Commands : MonoBehaviour
     public void Give(Arrrgs e)
     {
         EnsureConnected();
-        var userID = e.userID;
-        var displayName = e.displayName;
+        var userID = e.UserID;
+        var displayName = e.DisplayName;
 
         if (!gameDataScript.CheckIfPlayerExists(userID)) {
             // user not found... tell them to join
@@ -390,30 +390,30 @@ public class Commands : MonoBehaviour
             return;
         }
 
-        if (e.multiCommand == null || e.multiCommand.Count < 2) {
+        if (e.MultiCommand == null || e.MultiCommand.Count < 2) {
             // command is missing arguments show usage
             chatClient.SendMessage(chatJoinedChannel, $"@{displayName}, to give use !give [PlayerName] [Amount]");
             return;
         }
 
-        var otherPlayerDisplayName = e.multiCommand?[0].TrimStart('@');
+        var otherPlayerDisplayName = e.MultiCommand?[0].TrimStart('@');
         var PersonGettingMoney = gameDataScript.ConvertCommonNameToUserID(otherPlayerDisplayName);
 
         if (string.IsNullOrWhiteSpace(PersonGettingMoney) || !(gameDataScript.CheckIfPlayerExists(PersonGettingMoney) &&
         gameDataScript.CheckPlayerIDMatchesUserName(PersonGettingMoney, otherPlayerDisplayName))) {
             // The player you are trying to send to doesn't exist...
-            chatClient.SendMessage(chatJoinedChannel, $"@{displayName}, you can not give money to {e.multiCommand[0]} because they are not entered in the game.");
+            chatClient.SendMessage(chatJoinedChannel, $"@{displayName}, you can not give money to {e.MultiCommand[0]} because they are not entered in the game.");
             return;
         }
 
-        if (!int.TryParse(e.multiCommand[1], out var cost)) {
-            chatClient.SendMessage(chatJoinedChannel, $"'{e.multiCommand?[1]}' is not a valid money amount.");
+        if (!int.TryParse(e.MultiCommand[1], out var cost)) {
+            chatClient.SendMessage(chatJoinedChannel, $"'{e.MultiCommand?[1]}' is not a valid money amount.");
             return;
         }
 
         if (e.IsAdmin) {
             gameDataScript.AddMoneyToPlayerID(cost, PersonGettingMoney);
-            chatClient.SendMessage(chatJoinedChannel, $"@{displayName} granted {e.multiCommand[0]} ${cost}");
+            chatClient.SendMessage(chatJoinedChannel, $"@{displayName} granted {e.MultiCommand[0]} ${cost}");
             return;
         }
 
@@ -430,26 +430,26 @@ public class Commands : MonoBehaviour
 
         gameDataScript.SubtractMoneyFromPlayerID(cost, userID);
         gameDataScript.AddMoneyToPlayerID(cost, PersonGettingMoney);
-        chatClient.SendMessage(chatJoinedChannel, $"@{displayName} gave {e.multiCommand[0]} ${cost}");
+        chatClient.SendMessage(chatJoinedChannel, $"@{displayName} gave {e.MultiCommand[0]} ${cost}");
     }
 
     [HelpInfo(HelpText = "Use '!price [marble_name]' to get the price of any marble in the game.")]
     [Command(Name = "price", MatchExpression = "^price$")]
     public void Price(Arrrgs e) {
         EnsureConnected();
-        if (e.multiCommand.Count < 1) {
-            chatClient.SendMessage(chatJoinedChannel, $"@{e.displayName}, you need to specify a marble name.");
+        if (e.MultiCommand.Count < 1) {
+            chatClient.SendMessage(chatJoinedChannel, $"@{e.DisplayName}, you need to specify a marble name.");
             return;
         }
 
-        var marble = marbleList.GetMarble(e.argumentsAsString);
+        var marble = marbleList.GetMarble(e.ArgumentsAsString);
 
         if (marble == null) {
-            chatClient.SendMessage(chatJoinedChannel, $"@{e.displayName}, there is no marble with the name '{e.argumentsAsString}'.");
+            chatClient.SendMessage(chatJoinedChannel, $"@{e.DisplayName}, there is no marble with the name '{e.ArgumentsAsString}'.");
             return;
         }
 
-        chatClient.SendMessage(chatJoinedChannel, $"@{e.displayName}, the price of {marble.name} is ${marble.cost}.");
+        chatClient.SendMessage(chatJoinedChannel, $"@{e.DisplayName}, the price of {marble.name} is ${marble.cost}.");
     }
 
     [HelpInfo(HelpText = "Use '!store' to get the current items in the store.")]
@@ -458,7 +458,7 @@ public class Commands : MonoBehaviour
         EnsureConnected();
         var marbles = shop.MarblesInShop();
         var marbleListString = marbles.Select(m => $"{m.name}: ${m.cost}").Aggregate((o,n) => $"{o}, {n}");
-        chatClient.SendMessage(chatJoinedChannel, $"@{e.displayName}, the shop currently has these marbles: [{marbleListString}]");
+        chatClient.SendMessage(chatJoinedChannel, $"@{e.DisplayName}, the shop currently has these marbles: [{marbleListString}]");
     }
 
     [HelpInfo(HelpText = "Use '!rename [marble_name] [new_name]' to change the name of a marble in the inventory.")]
@@ -469,36 +469,36 @@ public class Commands : MonoBehaviour
         // Silently ignore non-admins
         if (!e.IsAdmin) { return; }
         // Missing arguments
-        if (e.multiCommand.Count != 2) return;
-        if (!marbleList.IsValidName(e.multiCommand[1]))
+        if (e.MultiCommand.Count != 2) return;
+        if (!marbleList.IsValidName(e.MultiCommand[1]))
         {
-            chatClient.SendMessage(chatJoinedChannel, $"You cannot rename the marble {e.multiCommand[0]} to {e.multiCommand[1]} because {e.multiCommand[1]} not a valid name.");
+            chatClient.SendMessage(chatJoinedChannel, $"You cannot rename the marble {e.MultiCommand[0]} to {e.MultiCommand[1]} because {e.MultiCommand[1]} not a valid name.");
             return;
         }
-        var existingMarble = marbleList.GetMarble(e.multiCommand[1]);
+        var existingMarble = marbleList.GetMarble(e.MultiCommand[1]);
         if (existingMarble != null)
         {
-            chatClient.SendMessage(chatJoinedChannel, $"You cannot rename the marble {e.multiCommand[0]} to {e.multiCommand[1]} because {e.multiCommand[1]} already exists.");
+            chatClient.SendMessage(chatJoinedChannel, $"You cannot rename the marble {e.MultiCommand[0]} to {e.MultiCommand[1]} because {e.MultiCommand[1]} already exists.");
             return;
         }
-        var shopMarble = shop.MarblesInShop().FirstOrDefault(m => m.commonName.Equals(e.multiCommand[0]));
+        var shopMarble = shop.MarblesInShop().FirstOrDefault(m => m.commonName.Equals(e.MultiCommand[0]));
         if (shopMarble != null)
         {
-            shopMarble.commonName = e.multiCommand[1];
+            shopMarble.commonName = e.MultiCommand[1];
             shop.ResetShop(false);
         }
-        var marble = marbleList.GetMarble(e.multiCommand[0]);
+        var marble = marbleList.GetMarble(e.MultiCommand[0]);
         if (marble != null)
         {
-            marble.commonName = e.multiCommand[1];
+            marble.commonName = e.MultiCommand[1];
         }
-        if (!marbleList.DoesMarbleCommonNameExist(e.multiCommand[1])) return;
-        if (marbleList.SetMarbleName(e.multiCommand[0], e.multiCommand[1]) >= 0)
+        if (!marbleList.DoesMarbleCommonNameExist(e.MultiCommand[1])) return;
+        if (marbleList.SetMarbleName(e.MultiCommand[0], e.MultiCommand[1]) >= 0)
         {
-            chatClient.SendMessage(chatJoinedChannel, $"Marble {e.multiCommand[0]} changed name! It is now called {e.multiCommand[1]}");
+            chatClient.SendMessage(chatJoinedChannel, $"Marble {e.MultiCommand[0]} changed name! It is now called {e.MultiCommand[1]}");
         }
 
-        gameDataScript.RenameAllPlayerSkins(e.multiCommand[0], e.multiCommand[1]);
+        gameDataScript.RenameAllPlayerSkins(e.MultiCommand[0], e.MultiCommand[1]);
     }
 
     [HelpInfo(HelpText = "Use '!setprice [marble_name] [amount]' to change the price a marble in the inventory.")]
@@ -508,22 +508,22 @@ public class Commands : MonoBehaviour
         // Silently ignore non-admins
         if (!e.IsAdmin) { return; }
         // Missing arguments
-        if (e.multiCommand.Count != 2) return;
+        if (e.MultiCommand.Count != 2) return;
         // Check that the price is a valid number between 0 and 9999
-        if (!int.TryParse(e.multiCommand[1], out var price) || price < 0 || price > 9999) return;
-        var shopMarble = shop.MarblesInShop().FirstOrDefault(m => m.commonName.Equals(e.multiCommand[0]));
+        if (!int.TryParse(e.MultiCommand[1], out var price) || price < 0 || price > 9999) return;
+        var shopMarble = shop.MarblesInShop().FirstOrDefault(m => m.commonName.Equals(e.MultiCommand[0]));
         if (shopMarble != null) {
             shopMarble.cost = price;
             shop.ResetShop(false);
         }
-        var marble = marbleList.GetMarble(e.multiCommand[0]);
+        var marble = marbleList.GetMarble(e.MultiCommand[0]);
         if (marble != null) {
             marble.cost = price;
         }
         // Check if the marble exists
-        if (!marbleList.DoesMarbleCommonNameExist(e.multiCommand[0])) return;
-        if (marbleList.SetMarbleCost(e.multiCommand[0], price) >= 0) {
-            chatClient.SendMessage(chatJoinedChannel, $"Marble {e.multiCommand[0]} changed price! It is now ${price}");
+        if (!marbleList.DoesMarbleCommonNameExist(e.MultiCommand[0])) return;
+        if (marbleList.SetMarbleCost(e.MultiCommand[0], price) >= 0) {
+            chatClient.SendMessage(chatJoinedChannel, $"Marble {e.MultiCommand[0]} changed price! It is now ${price}");
         }
     }
 

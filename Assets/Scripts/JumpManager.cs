@@ -44,8 +44,8 @@ public class JumpManager : MonoBehaviour
 
     public void CreateMarbleAndJump(Arrrgs e)
     {
-        var userID = e.userID;
-        var displayName = e.displayName;
+        var userID = e.UserID;
+        var displayName = e.DisplayName;
 
         //if the player has not jumped yet
         if (!longJumpedPlayers.Contains(userID))
@@ -81,8 +81,8 @@ public class JumpManager : MonoBehaviour
 
     public void CreateMarbleAndHighJump(Arrrgs e)
     {
-        var userID = e.userID;
-        var displayName = e.displayName;
+        var userID = e.UserID;
+        var displayName = e.DisplayName;
         if (!(highJumpedPlayers.Contains(userID)))
         {
             highJumpedPlayers.Add(userID);

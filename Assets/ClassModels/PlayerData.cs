@@ -7,15 +7,21 @@
 // ReSharper disable IteratorNeverReturns
 
 using System.Collections.Generic;
+using Newtonsoft.Json;
 
-public class PlayerData 
-    //DATA that is stored in a dictionary and can be accessed by looking at the key which will be a player chat ID 
+//DATA that is stored in a dictionary and can be accessed by looking at the key which will be a player chat ID 
+public class PlayerData
 {
-    public int money = 0;
-    public List<string> purchasedSkins = new List<string>();
-    public string playerName;
-    public bool isSubscribed;
-    public string selectedSkin;
+    [JsonProperty("money")]
+    public int Money { get; set; } = 0;
+    [JsonProperty("purchasedSkins")]
+    public List<string> PurchasedSkins { get; set; } = new List<string>();
+    [JsonProperty("playerName")]
+    public string PlayerName { get; set; }
+    [JsonProperty("isSubscribed")]
+    public bool IsSubscribed { get; set; }
+    [JsonProperty("selectedSkin")]
+    public string SelectedSkin { get; set; }
     //Things I may want to add later bellow
     //public Dictionary<int, bool> sfx = new Dictionary<int, bool>();
     //public Dictionary<int, bool> vfx = new Dictionary<int, bool>();

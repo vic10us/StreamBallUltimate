@@ -6,11 +6,9 @@
 // ReSharper disable UnusedMember.Local
 // ReSharper disable IteratorNeverReturns
 
-using System.Collections.Generic;
-using Newtonsoft.Json;
+using System;
 
-public class MarbleInfos {
-    [JsonIgnore]
-    public bool IsDirty { get; set; } = false;
-    public List<MarbleInfo> Marbles { get; set; } = new List<MarbleInfo>();
+public class CommandHandler {
+    public bool Queue { get; set; } = true;
+    public Action<Arrrgs> Handle;
 }

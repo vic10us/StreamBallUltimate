@@ -15,18 +15,19 @@ public static class GlobalConfiguration
 {
     public static string bot_name;
     public static string client_id;
-    public static string client_secret; 
-    public static string bot_access_token; 
+    public static string client_secret;
+    public static string bot_access_token;
     public static string bot_refresh_token; //hai
     public static string channel_name;
-    private static string ConfigurationPath => Application.persistentDataPath;
     public static string ConfigurationFileName = "global.cfg";
+
+    private static string ConfigurationPath => Application.persistentDataPath;
     private static Configuration _config;
     private static string ConfigurationFile => Path.Combine(ConfigurationPath, ConfigurationFileName);
 
     public static string GetValue(string scope, string key) {
         var result = (_config[scope][key]?.StringValue ?? "").Or(GetEnvironmentVariable($"sbu_{scope}_{key}"));
-        return result; // _config[scope][key]?.StringValue ?? GetEnvironmentVariable(key);
+        return result;
     }
 
     private static string Or(this string value, string alternative) {

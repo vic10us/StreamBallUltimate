@@ -61,7 +61,7 @@ public class CommandQueue : MonoBehaviour
     //This Separates the different commands into buckets
     public void FirstCommandBuckets(Arrrgs e)
     {
-        var firstCommand = e.commandText;
+        var firstCommand = e.CommandText;
         //These commands will provide player confirmation/Response in CHAT
         var commandHandler = commands.GetCommandHandler(firstCommand);
         if (commandHandler == null) return;

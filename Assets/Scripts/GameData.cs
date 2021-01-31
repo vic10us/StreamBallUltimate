@@ -26,8 +26,8 @@ public class GameData : MonoBehaviour
         //Load game data at start of game from JSON
         gameData = JsonConvert.DeserializeObject<Dictionary<string, PlayerData>>(dataManager.Load());
         foreach (var kvp in gameData) {
-            if (string.IsNullOrWhiteSpace(kvp.Value.selectedSkin)) kvp.Value.selectedSkin = "default";
-            if (!kvp.Value.purchasedSkins.Any()) kvp.Value.purchasedSkins.Add("default");
+            if (string.IsNullOrWhiteSpace(kvp.Value.SelectedSkin)) kvp.Value.SelectedSkin = "default";
+            if (!kvp.Value.PurchasedSkins.Any()) kvp.Value.PurchasedSkins.Add("default");
         }
         dataManager.NewSave(gameData);
     }
@@ -37,14 +37,14 @@ public class GameData : MonoBehaviour
         var playersAffected = 
             gameData
                 .Where(kvp => 
-                    kvp.Value.purchasedSkins.Any(sn => sn.Equals(oldName, StringComparison.InvariantCultureIgnoreCase)))
+                    kvp.Value.PurchasedSkins.Any(sn => sn.Equals(oldName, StringComparison.InvariantCultureIgnoreCase)))
                 .ToDictionary(k => k.Key, k => k.Value);
         if (!playersAffected.Any()) return;
         foreach (var p in playersAffected.Select(keyValuePair => gameData[keyValuePair.Key]))
         {
-            if (p.selectedSkin.Equals(oldName, StringComparison.InvariantCultureIgnoreCase))
-                p.selectedSkin = newName;
-            p.purchasedSkins = p.purchasedSkins.Select(s => s.Equals(oldName, StringComparison.InvariantCultureIgnoreCase) ? newName : s).ToList();
+            if (p.SelectedSkin.Equals(oldName, StringComparison.InvariantCultureIgnoreCase))
+                p.SelectedSkin = newName;
+            p.PurchasedSkins = p.PurchasedSkins.Select(s => s.Equals(oldName, StringComparison.InvariantCultureIgnoreCase) ? newName : s).ToList();
         }
         SaveGameDataToTXT();
     }
@@ -58,12 +58,12 @@ public class GameData : MonoBehaviour
     {
         var tempData = new PlayerData
         {
-            money = 0, 
-            selectedSkin = "default", 
-            playerName = e.displayName, 
-            isSubscribed = false
+            Money = 0, 
+            SelectedSkin = "default", 
+            PlayerName = e.DisplayName, 
+            IsSubscribed = false
         };
-        gameData.Add(e.userID, tempData);
+        gameData.Add(e.UserID, tempData);
         SaveGameDataToTXT();
     }
 
@@ -71,7 +71,7 @@ public class GameData : MonoBehaviour
     {
         var userGameData = gameData[playerID];
         if (userGameData == null) return;
-        gameData[playerID].money += money;
+        gameData[playerID].Money += money;
         SaveGameDataToTXT();
     }
 
@@ -79,40 +79,40 @@ public class GameData : MonoBehaviour
     {
         var userGameData = gameData[playerID];
         if (userGameData == null) return;
-        gameData[playerID].money -= money;
+        gameData[playerID].Money -= money;
         SaveGameDataToTXT();
     }
 
     public int CheckPlayerMoney(string playerID)
     {
-        return gameData[playerID].money;
+        return gameData[playerID].Money;
     }
 
     public bool IsSkinUnlocked(string playerId, string commonName) {
         return gameData[playerId]?
-            .purchasedSkins
+            .PurchasedSkins
             .Any(c => c.Equals(commonName, StringComparison.InvariantCultureIgnoreCase)) 
             ?? false;
     }
 
     public void UnlockSkinForPlayer(string playerID, string commonName) {
         var playerData = gameData[playerID];
-        if (!playerData.purchasedSkins.Any(s => s.Equals(commonName, StringComparison.InvariantCultureIgnoreCase)))
-            playerData.purchasedSkins.Add(commonName);
+        if (!playerData.PurchasedSkins.Any(s => s.Equals(commonName, StringComparison.InvariantCultureIgnoreCase)))
+            playerData.PurchasedSkins.Add(commonName);
         SaveGameDataToTXT();
     }
 
     public void SetPlayerEquipSkin(string playerID, string commonName)
     {
         var playerData = gameData[playerID];
-        playerData.selectedSkin = commonName;
+        playerData.SelectedSkin = commonName;
         SaveGameDataToTXT();
     }
 
     public string GetPlayerEquipSkin(string playerID)
     {
         var playerData = gameData[playerID];
-        return string.IsNullOrWhiteSpace(playerData.selectedSkin) ? "default" : playerData.selectedSkin;
+        return string.IsNullOrWhiteSpace(playerData.SelectedSkin) ? "default" : playerData.SelectedSkin;
     }
 
     public void SaveGameDataToTXT()
@@ -122,33 +122,33 @@ public class GameData : MonoBehaviour
 
     public string CheckSkins(Arrrgs e)
     {
-        var playerID = e.userID;
-        var playerName = e.displayName;
+        var playerID = e.UserID;
+        var playerName = e.DisplayName;
         var playerData = gameData[playerID];
-        return $"@{playerName} owns [{string.Join(", ", playerData.purchasedSkins)}]";
+        return $"@{playerName} owns [{string.Join(", ", playerData.PurchasedSkins)}]";
     }
     
     public string ConvertCommonNameToUserID(string commonName)
     {
-        var e = gameData.FirstOrDefault(kvp => kvp.Value.playerName.Equals(commonName, StringComparison.InvariantCultureIgnoreCase));
+        var e = gameData.FirstOrDefault(kvp => kvp.Value.PlayerName.Equals(commonName, StringComparison.InvariantCultureIgnoreCase));
         return e.Key ?? "";
     }
     
     public bool CheckPlayerIDMatchesUserName(string userID, string name)
     {
-        return gameData[userID].playerName == name;
+        return gameData[userID].PlayerName == name;
     }
 
     internal string RemoveSkinFromPlayer(string playerID, string commonName)
     {
         var playerData = gameData[playerID];
-        var skin = playerData.purchasedSkins.FirstOrDefault(
+        var skin = playerData.PurchasedSkins.FirstOrDefault(
             s => s.Equals(commonName, StringComparison.InvariantCultureIgnoreCase));
         if (string.IsNullOrWhiteSpace(skin)) return commonName;
-        playerData.purchasedSkins.Remove(skin);
-        if (playerData.selectedSkin.Equals(commonName, StringComparison.InvariantCultureIgnoreCase))
-            playerData.selectedSkin = playerData.purchasedSkins.FirstOrDefault() ?? "default";
+        playerData.PurchasedSkins.Remove(skin);
+        if (playerData.SelectedSkin.Equals(commonName, StringComparison.InvariantCultureIgnoreCase))
+            playerData.SelectedSkin = playerData.PurchasedSkins.FirstOrDefault() ?? "default";
         SaveGameDataToTXT();
-        return playerData.selectedSkin;
+        return playerData.SelectedSkin;
     }
 }

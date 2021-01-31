@@ -71,18 +71,18 @@ public class TwitchClient : MonoBehaviour
         var chatArgs = new Arrrgs
         {
             MessageType = MessageType.Command,
-            isMod = e.Command.ChatMessage.IsModerator,
-            isBroadcaster = e.Command.ChatMessage.IsBroadcaster,
-            message = e.Command.ChatMessage.Message,
-            userID = e.Command.ChatMessage.UserId,
-            displayName = e.Command.ChatMessage.DisplayName,
-            commandText = e.Command.CommandText,
-            multiCommand = e.Command.ArgumentsAsList,
-            argumentsAsString = e.Command.ArgumentsAsString,
+            IsMod = e.Command.ChatMessage.IsModerator,
+            IsBroadcaster = e.Command.ChatMessage.IsBroadcaster,
+            Message = e.Command.ChatMessage.Message,
+            UserID = e.Command.ChatMessage.UserId,
+            DisplayName = e.Command.ChatMessage.DisplayName,
+            CommandText = e.Command.CommandText,
+            MultiCommand = e.Command.ArgumentsAsList,
+            ArgumentsAsString = e.Command.ArgumentsAsString,
         };
 
         if (e.Command.ArgumentsAsList.Any())
-            chatArgs.commandArgs = e.Command.ArgumentsAsList?.Aggregate((o, n) => $"{o}{n}");
+            chatArgs.CommandArgs = e.Command.ArgumentsAsList?.Aggregate((o, n) => $"{o}{n}");
 
         commandQueue.FirstCommandBuckets(chatArgs);
         debug.text = (e.Command.ChatMessage.Username);
@@ -93,11 +93,11 @@ public class TwitchClient : MonoBehaviour
         var chatArgs = new Arrrgs
         {
             MessageType = MessageType.Whisper,
-            message = e.WhisperMessage.Message,
-            userID = e.WhisperMessage.UserId,
-            displayName = e.WhisperMessage.DisplayName,
-            commandText = ConvertWhisperToCommand(e.WhisperMessage.Message),
-            commandArgs = ConvertWhisperToArguments(e.WhisperMessage.Message)
+            Message = e.WhisperMessage.Message,
+            UserID = e.WhisperMessage.UserId,
+            DisplayName = e.WhisperMessage.DisplayName,
+            CommandText = ConvertWhisperToCommand(e.WhisperMessage.Message),
+            CommandArgs = ConvertWhisperToArguments(e.WhisperMessage.Message)
         };
         commandQueue.FirstCommandBuckets(chatArgs);
     }
