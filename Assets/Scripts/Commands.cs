@@ -310,6 +310,28 @@ public class Commands : MonoBehaviour
         chatClient.SendMessage(chatJoinedChannel, $"@{playerUserName}, is using the {commonName} skin!");
     }
 
+
+    [HelpInfo(HelpText = "Use '!gametime' Start the game now!")]
+    [Command(Name = "gametime", MatchExpression = "^gametime", Queue = false, AdminOnly = true)]
+    public void GameTime(Arrrgs e)
+    {
+        EnsureConnected();
+        if (!e.IsAdmin) return;
+        // if (gameController.currentState != GameState.GameTime) return;
+        gameController.PlayNow();
+    }
+
+    [HelpInfo(HelpText = "Use '!stopgame' Stop the game now!")]
+    [Command(Name = "stopgame", MatchExpression = "^stopgame", Queue = false, AdminOnly = true)]
+    public void StopGame(Arrrgs e)
+    {
+        EnsureConnected();
+        if (!e.IsAdmin) return;
+        // if (gameController.currentState == GameState.GameTime) return;
+        gameController.DowntimeNow();
+    }
+
+
     [HelpInfo(HelpText = "Use '!play' to play the game! First time is free. $50 to replay")]
     [Command(Name = "play", MatchExpression = "^play$", Queue = false)]
     public void Play(Arrrgs e)
